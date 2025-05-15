@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment-Bereiche</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        h1 { text-align: center; }
+        input[type="text"] {
+            width: 100%; padding: 12px; margin-bottom: 20px;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .card {
+            background: white; padding: 20px;
+            border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center; transition: 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .card a {
+            text-decoration: none; color: #333; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Assessment-Bereiche</h1>
+    <input type="text" id="searchInput" onkeyup="searchCards()" placeholder="Suche Assessment oder Bereich...">
+    <div class="grid" id="cardGrid">
+        <div class="card"><a href="bereiche/kraft/">Kraft</a></div>
+<div class="card"><a href="bereiche/gleichgewicht/">Gleichgewicht</a></div>
+<div class="card"><a href="bereiche/mobilitaet_gang/">Mobilitaet_gang</a></div>
+<div class="card"><a href="bereiche/ausdauer/">Ausdauer</a></div>
+<div class="card"><a href="bereiche/neuro/">Neuro</a></div>
+<div class="card"><a href="bereiche/kognition/">Kognition</a></div>
+<div class="card"><a href="bereiche/innere/">Innere</a></div>
+    </div>
+
+    <script>
+        function searchCards() {
+            var input = document.getElementById("searchInput").value.toLowerCase();
+            var cards = document.getElementsByClassName("card");
+            for (var i = 0; i < cards.length; i++) {
+                var txt = cards[i].innerText.toLowerCase();
+                cards[i].style.display = txt.includes(input) ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>
