@@ -1,23 +1,34 @@
-const CACHE_NAME = 'flying-assessment-v19'; 
+const CACHE_NAME = 'assessment-praxis-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  'index.html',
-  'standard.html',
-  'bereiche.html',
-  'sppb.html',
-  'demmi.html',
-  'manifest.json',
-  'icon.png',
-  'SPPB_Protokoll.pdf',
-  'DEMMI_Protokoll.pdf',
-  'Assessment-Leitfaden.pdf',
+  '30s_assissted.html',
+  '5xsit-stand.html',
+  'BBS.html',
+  'DEMMI.html',
   'FiST.html',
   'FSMC.html',
+  'FSST.html',
+  'FES-I.html',
+  'GDS.html',
+  'Gaitspeed.html',
+  'ISI.html',
+  'MCTSIB.html',
+  'PSFS_GAS.html',
   'SARA.html',
-  'BBS.html',
-  'BBS.pdf',
-  'PSFS_GAS.html'
-  
+  'SPPB.html',
+  'TUG.html',
+  'Trunk Impairment Scale.html',
+  'tinetti.html',
+  'Zusatzmaterial/BBS_Protokoll.pdf',
+  'Zusatzmaterial/DEMMI_Protokoll.pdf',
+  'Zusatzmaterial/FES_I_Deutsch.pdf',
+  'Zusatzmaterial/FSST_protokoll.pdf',
+  'Zusatzmaterial/GDS_15_Deutsch.pdf',
+  'Zusatzmaterial/ISI-Deutsch.pdf',
+  'Zusatzmaterial/PSFS_GAS_Kurzmanual.pdf',
+  'Zusatzmaterial/SPPB_Protokoll.pdf',
+  'icon.png',
+  'manifest.json',
+  'Hauptseite.html'
 ];
 
 // Neue Version sofort aktiv
