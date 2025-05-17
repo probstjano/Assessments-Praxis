@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FiST – Function in Sitting Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
+    label { display: block; margin: 10px 0 5px; }
+    select {
+      width: 100%;
+      padding: 6px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+    #result { font-weight: bold; margin-top: 20px; }
+    .nav-buttons { margin-top: 30px; }
+    .nav-buttons a {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 10px 15px;
+      background: #eee;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #000;
+    }
+    .nav-buttons a:hover { background: #ddd; }
+  </style>
+</head>
+<body>
+  <h1>FiST – Function in Sitting Test</h1>
+  <p>Bewertung der Funktion im Sitzen (z. B. nach Schlaganfall oder bei Rumpfkontrollstörungen).</p>
+  <p>Geeignet wenn Sitzen einzig mögliche oder wichitgste Aktivität/Funktion ist</p>
+  
+  <p><strong>Positionierung:</strong> bevorzugt im Bett, ½ Femur auf Sitzfläche, Hüft- & Kniegelenke 90°, ggf. Hocker für Fußunterstützung um entsprechende Winkel zu erreiche, Hände auf Schoss </p>
+  <p>Detaillierte Beschreibung hier:  <a href="https://www.samuelmerritt.edu/fist/items" target="_blank">zur Webseite</a> </p>
+  
+  <form id="fistForm">
+    <div id="questions"></div>
+    <button type="button" onclick="calculateFiST()">✅ Score berechnen</button>
+    <button type="button" onclick="downloadPDF()">📄 Als PDF speichern</button>
+  </form>
+
+  <p id="result"></p>
+
+  
+
+  <script>
+    const questions = [
+      "1. Nudge vorne (Sternum)",
+      "2. Nudge hinten (zwischen Schulterblättern)",
+      "3. Nudge seitlich (dominante Seite)",
+      "4. Statisches Sitzen (30 Sek.)",
+      "5. Kopf dreht links & rechts (‚Nein‘)",
+      "6. Sitzen mit geschlossenen Augen (30 Sek.)",
+      "7. Fuss anheben (dominante Seite, 2x 2-3cm)",
+      "8. Objekt hinter sich aufheben (mittig)",
+      "9. Vorwärts greifen (dominanter Arm)",
+      "10. Seitlich greifen (dominanter Arm, über Gesäß hinaus)",
+      "11. Objekt vom Boden aufheben (zwischen den Füssen)",
+      "12. Rückwärts rutschen (5 cm)",
+      "13. Vorwärts rutschen (5 cm)",
+      "14. Seitlich rutschen (dominante Seite, 5 cm)"
+    ];
+
+    const options = [
+      { value: 4, label: "4 – Selbständig" },
+      { value: 3, label: "3 – Verbale Hinweise / verlängerte Zeit" },
+      { value: 2, label: "2 – Stütz mit Armen" },
+      { value: 1, label: "1 – Benötigt Hilfe" },
+      { value: 0, label: "0 – Vollständig abhängig" }
+    ];
+
+    const container = document.getElementById("questions");
+    questions.forEach((text, i) => {
+      let optionsHTML = "";
+      options.forEach(opt => {
+        optionsHTML += `<option value="${opt.value}">${opt.label}</option>`;
+      });
+      const html = `<label>${text}<select name="q${i}">${optionsHTML}</select></label>`;
+      container.innerHTML += html;
+    });
+
+    function calculateFiST() {
+      const form = document.forms["fistForm"];
+      let score = 0;
+      for (let i = 0; i < questions.length; i++) {
+        score += parseInt(form["q" + i].value);
+      }
+      const max = questions.length * 4;
+      document.getElementById("result").innerText = `Gesamt-Score: ${score}/${max}`;
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const form = document.forms["fistForm"];
+      let y = 10;
+
+      doc.text("FiST-Auswertung", 10, y);
+      y += 10;
+
+      for (let i = 0; i < questions.length; i++) {
+        const selectedValue = form["q" + i].value;
+        const optionLabel = options.find(opt => opt.value.toString() === selectedValue)?.label || "Keine Auswahl";
+        doc.text(`${questions[i]}: ${optionLabel}`, 10, y);
+        y += 7;
+        if (y > 280) {
+          doc.addPage();
+          y = 10;
+        }
+      }
+
+      y += 5;
+      const resultText = document.getElementById("result").innerText || "Kein Ergebnis berechnet.";
+      doc.text(resultText, 10, y);
+      doc.save("fist-ergebnis.pdf");
+    }
+  </script>
+<p><a href="Hauptseite.html">Zurück zur Hauptseite</a></p>
+</body>
+</html>

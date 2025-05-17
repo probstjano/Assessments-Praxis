@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DEMMI – De Morton Mobility Index</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
+    label { display: block; margin: 10px 0 5px; }
+    select {
+      width: 100%;
+      padding: 6px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+    #result { font-weight: bold; margin-top: 20px; }
+    .nav-buttons { margin-top: 30px; }
+    .nav-buttons a {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 10px 15px;
+      background: #eee;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #000;
+    }
+    .nav-buttons a:hover { background: #ddd; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>FSMC – Fatigue Skala für Motorik und Kognition</h1>
+  <p> Abklärung von motorischer und kognitiver Fatigue-Symptomatik bei Patienten mit Multipler Skleorse </p>
+  <p> In Cenplex Behandlungsplan als <strong> Messung </strong> vorhanden. Hier eintragen/durchführen und Summen-Scores im Cenplex übertragen </p>
+  <form id="fsmcForm">
+    <div id="questions"></div>
+    <button type="button" onclick="calculateFSMC()">✅ Score berechnen</button>
+    <button type="button" onclick="generatePDF()">📄 PDF erstellen</button>
+  </form>
+
+   
+  
+  <div id="result"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const questions = [
+      "Wenn ich mich längere Zeit konzentriere, erschöpft es mich schneller als andere Menschen in meinem Alter.",
+      "Meine Bewegungen werden im Zustand der Erschöpfung deutlich ungeschickter und unkoordinierter.",
+      "Wegen meiner Erschöpfungszustände brauche ich heute bei körperliche Tätigkeiten häufigere und/oder längere Ruhepausen als früher.",
+      "Im Zustand der Erschöpfung bin ich unfähig, Entscheidungen zu treffen.",
+      "Ich fühle mich heute körperlich schneller erschöpft als früher, wenn ich stressige Situationen ausgesetzt bin.",
+      "Wegen meinte Erschöpfungszustände habe ich wesentlich weniger sozialer Kontakte als früher.",
+      "Wegen meiner Erschöpfungszustände fällt es mir heute schwerer, etwas Neues zu lernen als früher.",
+      "Berufliche Anforderungen lassen mich geistig schneller erschöpfen als früher.",
+      "Erschöpfungszustände spüre ich besonders stark in meinen Muskeln.",
+      "Bei körperlicher Anstrengung über einen längeren Zeitraum habe ich mehr Mühe durchzuhalten als früher.",
+      "Meine Konzentrationsfähigkeit nimmt bei Stress beträchtlich ab.",
+      "Im Zustand der Erschöpfung bin ich weniger motiviert als andere Menschen, Tätigkeiten zu beginnen, die mit körperlicher Anstrengung verbunden sind.",
+      "Mein Denken verlangsamt sich zusehends, wenn es heiss ist.",
+      "Meine Bewegungen werden im Zustand der Erschöpfung eindeutig langsamer.",
+      "Wegen meiner Erschöfpungszustände habe ich heute weniger Lust als früher, etwas zu tun, was Nachdenken erfordert.",
+      "Wenn sich ein Erschöpfungszustand einstellt, bin ich überhaupt nciht mehr in der Lage, schnell zu reagieren.",
+      "Im Zustand der Erschöpfung, kommen mit bestimmte Worte nicht mehr in den Sinn.",
+      "Meine Aufmerksamkeit lässt im Erschöpfungszustand wesentlich schneller nach als früher.",
+      "Wenn es heiss ist, fühle ich mich hauptsächlich körperlich extrem schwach und energielos.",
+      "Im Zustand der Erschöpfung nimmt meine Vergesslichkeit merklich zu."
+    ];
+
+    const labels = [
+      "Trifft gar nicht zu",
+      "Trifft wenig zu",
+      "Trifft teils zu",
+      "Trifft ziemlich zu",
+      "Trifft völlig zu"
+    ];
+
+    const cognitiveIndexes = [0, 3, 6, 7, 10, 12, 14, 16, 17, 19];
+    const motorIndexes = [1, 2, 4, 5, 8, 9, 11, 13, 15, 18];
+
+    const container = document.getElementById("questions");
+    questions.forEach((text, i) => {
+      const block = document.createElement("div");
+      block.className = "question-block";
+      const options = labels.map((label, idx) => `<option value="${idx + 1}">${label}</option>`).join("");
+      block.innerHTML = `
+        <div class="question">${i + 1}. ${text}</div>
+        <select name="q${i}" required>
+          <option value="" disabled selected>Antwort auswählen</option>
+          ${options}
+        </select>
+      `;
+      container.appendChild(block);
+    });
+
+    function calculateFSMC() {
+      let cognitive = 0, motoric = 0;
+      for (let i = 0; i < 20; i++) {
+        const val = parseInt(document.querySelector(`select[name='q${i}']`)?.value);
+        if (!val) return alert("Bitte alle Fragen beantworten.");
+        if (cognitiveIndexes.includes(i)) cognitive += val;
+        else if (motorIndexes.includes(i)) motoric += val;
+      }
+      const total = cognitive + motoric;
+
+      const level = (value, thresholds) => {
+        if (value >= thresholds[2]) return "Schwere";
+        if (value >= thresholds[1]) return "Mittelgradige";
+        if (value >= thresholds[0]) return "Leichte";
+        return "Keine";
+      };
+
+      document.getElementById("result").innerText =
+        `FSMC Gesamt: ${total} (${level(total, [43, 53, 63])} Fatigue)\n` +
+        `Kognitive Fatigue: ${cognitive} (${level(cognitive, [22, 28, 34])})\n` +
+        `Motorische Fatigue: ${motoric} (${level(motoric, [22, 27, 32])})`;
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      let doc = new jsPDF();
+      let y = 10;
+
+      doc.setFontSize(16);
+      doc.text("FSMC – Auswertung", 10, y);
+      y += 10;
+
+      let cognitive = 0, motoric = 0;
+      questions.forEach((q, i) => {
+        const val = parseInt(document.querySelector(`select[name='q${i}']`)?.value);
+        if (!val) val = 0;
+        if (cognitiveIndexes.includes(i)) cognitive += val;
+        else if (motorIndexes.includes(i)) motoric += val;
+      });
+      const total = cognitive + motoric;
+
+      const level = (value, thresholds) => {
+        if (value >= thresholds[2]) return "Schwere";
+        if (value >= thresholds[1]) return "Mittelgradige";
+        if (value >= thresholds[0]) return "Leichte";
+        return "Keine";
+      };
+
+      doc.setFontSize(12);
+      doc.text(`FSMC Gesamt: ${total} (${level(total, [43, 53, 63])} Fatigue)`, 10, y);
+      y += 7;
+      doc.text(`Kognitive Fatigue: ${cognitive} (${level(cognitive, [22, 28, 34])})`, 10, y);
+      y += 7;
+      doc.text(`Motorische Fatigue: ${motoric} (${level(motoric, [22, 27, 32])})`, 10, y);
+      y += 10;
+
+      questions.forEach((q, i) => {
+        const val = document.querySelector(`select[name='q${i}']`)?.value;
+        const label = val ? labels[parseInt(val) - 1] : "-";
+        const line = `${i + 1}. ${q}\nAntwort: ${label}`;
+        doc.text(line, 10, y);
+        y += 10;
+        if (y > 280) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      window.open(doc.output('bloburl'), '_blank');
+    }
+  </script>
+<p><a href="Hauptseite.html">Zurück zur Hauptseite</a></p>
+</body>
+</html>

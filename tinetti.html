@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DEMMI – De Morton Mobility Index</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
+    label { display: block; margin: 10px 0 5px; }
+    select {
+      width: 100%;
+      padding: 6px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+    #result { font-weight: bold; margin-top: 20px; }
+    .nav-buttons { margin-top: 30px; }
+    .nav-buttons a {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 10px 15px;
+      background: #eee;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #000;
+    }
+    .nav-buttons a:hover { background: #ddd; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Tinetti POMA</h1>
+  <p>Assessment für Gleichgewicht und Gang. V.a. an älteren Menschen/Geriatrie untersucht. Empfohlen als Teil von Sturzrisiko-Assessments, weniger geeignet zur Verlaufsbeobachtung.</p>
+  <p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> hinterlegt. Hier durchführen und Summenscore übertragen.</p>
+  <p>Ausführliches Protokoll hier: <a href="Zusatzmaterial/Tinetti_Protokoll.pdf" target="_blank">Tinetti Protokoll (PDF)</a></p>
+
+  <form id="Tinettiform">
+    <div id="questions"></div>
+    <button type="button" onclick="calculateTINETTI()">✅ Score berechnen</button>
+    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
+  </form>
+
+  <div id="result"></div>
+
+  
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const questions = [
+      { text: "Sitzbalance", options: ["0 – lehnt zur Seite oder rutscht im Stuhl", "1 – sicher, stabil"] },
+      { text: "Aufstehen", options: ["0 – ohne Hilfe nicht möglich", "1 – möglich, aber braucht Arme", "2 – möglich ohne Benützung der Arme"] },
+      { text: "Versuche, aufzustehen", options: ["0 – unmöglich ohne Hilfe", "1 – möglich, aber braucht mehr als einen Versuch", "2 – möglich, in einem Versuch"] },
+      { text: "Unmittelbare Stehbalance", options: ["0 – unsicher (kleine Schritte, Rumpfbewegung)", "1 – sicher mit Hilfsmittel", "2 – sicher ohne Hilfsmittel"] },
+      { text: "Stehbalance mit geschlossenen Füßen", options: ["0 – unsicher", "1 – sicher mit Abstand/Hilfsmittel", "2 – sicher ohne Hilfsmittel"] },
+      { text: "Stoss", options: ["0 – würde fallen", "1 – muss sich halten, fällt aber nicht", "2 – sicher"] },
+      { text: "Augen geschlossen", options: ["0 – unsicher", "1 – sicher"] },
+      { text: "Beginn des Gangs", options: ["0 – Zögern oder mehrfacher Versuch", "1 – kein Zögern"] },
+      { text: "Schrittlänge rechts", options: ["0 – nicht vor linken Standfuß", "1 – vor linken Standfuß"] },
+      { text: "Schritthöhe rechts", options: ["0 – kein vollständiger Abhub", "1 – vollständiger Abhub"] },
+      { text: "Schrittlänge links", options: ["0 – nicht vor rechten Standfuß", "1 – vor rechten Standfuß"] },
+      { text: "Schritthöhe links", options: ["0 – kein vollständiger Abhub", "1 – vollständiger Abhub"] },
+      { text: "Gangsymmetrie", options: ["0 – ungleich", "1 – gleich"] },
+      { text: "Schrittkontinuität", options: ["0 – diskontinuierlich", "1 – kontinuierlich"] },
+      { text: "Rumpfstabilität", options: ["0 – starkes Schwanken/Hilfsmittel", "1 – vornübergebeugt/Arme nötig", "2 – stabil, keine Hilfe"] },
+      { text: "Schrittbreite", options: ["0 – >5 cm", "1 – Füße berühren sich beinahe"] },
+      { text: "Drehung um 360°", options: ["0 – diskontinuierlich", "1 – kontinuierlich"] },
+      { text: "Absitzen", options: ["0 – unsicher", "1 – grob/mit Armen", "2 – sicher/kontrolliert"] }
+    ];
+
+    const balanceIndexes = [0,1,2,3,4,5,6,14,16,17];
+    const gaitIndexes = [7,8,9,10,11,12,13,15];
+
+    function renderForm() {
+      const container = document.getElementById("questions");
+      container.innerHTML = "";
+      questions.forEach((q, i) => {
+        const block = document.createElement("div");
+        block.className = "question-block";
+        const options = q.options.map(opt => {
+          const val = parseInt(opt.split(" – ")[0]);
+          return `<option value="${val}">${opt}</option>`;
+        }).join("");
+        block.innerHTML = `
+          <div class="question">${i + 1}. ${q.text}</div>
+          <select name="q${i}" required>
+            <option value="" disabled selected>Antwort auswählen</option>
+            ${options}
+          </select>
+        `;
+        container.appendChild(block);
+      });
+    }
+
+    function calculateTINETTI() {
+      let balance = 0, gait = 0;
+      for (let i = 0; i < questions.length; i++) {
+        const val = parseInt(document.querySelector(`select[name='q${i}']`)?.value);
+        if (isNaN(val)) return alert("Bitte alle Fragen beantworten.");
+        if (balanceIndexes.includes(i)) balance += val;
+        else if (gaitIndexes.includes(i)) gait += val;
+      }
+
+      const total = balance + gait;
+      let riskLevel = "";
+      if (total < 19) riskLevel = "Hohes Sturzrisiko";
+      else if (total <= 24) riskLevel = "Mittleres Sturzrisiko";
+      else riskLevel = "Geringes Sturzrisiko";
+
+      const balRisk = balance < 12 ? "Sturzrisiko erhöht" : "besser als empfohlener cut-off Wert";
+      const gaitRisk = gait < 8 ? "Sturzrisiko erhöht" : "besser als empfohlener cut-off Wert";
+
+      document.getElementById("result").innerHTML =
+        `<strong>Gesamt-Score:</strong> ${total} / 28 → ${riskLevel}<br>` +
+        `<strong>Gleichgewicht:</strong> ${balance} / 16 → ${balRisk}<br>` +
+        `<strong>Gang:</strong> ${gait} / 12 → ${gaitRisk}<br><br>` +
+        `<em>Hinweis: Die Einteilung des Sturzrisikos variiert je nach Literaturquelle.</em>`;
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      let total = 0;
+
+      doc.setFontSize(16);
+      doc.text("Tinetti POMA – Auswertung", 10, y);
+      y += 10;
+
+      for (let i = 0; i < questions.length; i++) {
+        const sel = document.querySelector(`select[name='q${i}']`);
+        if (!sel || sel.selectedIndex < 0) continue;
+        const val = parseInt(sel.value);
+        const label = sel.options[sel.selectedIndex].text;
+        total += val;
+        doc.setFontSize(12);
+        doc.text(`${i + 1}. ${questions[i].text}`, 10, y);
+        y += 6;
+        doc.text(`Antwort: ${label}`, 10, y);
+        y += 10;
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
+      }
+
+      doc.setFontSize(14);
+      doc.text(`Gesamtscore: ${total} / 28`, 10, y);
+      window.open(doc.output('bloburl'), '_blank');
+    }
+
+    renderForm();
+  </script>
+<p><a href="Hauptseite.html">Zurück zur Hauptseite</a></p>
+</body>
+</html>
