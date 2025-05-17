@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini-BESTest (Originaltexte)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 1000px; margin: auto; background: #f8f8f8; }
+    h1 { text-align: center; }
+    .question-block { margin-bottom: 25px; }
+    .question-block label { font-weight: bold; display: block; margin-bottom: 8px; }
+    select { width: 100%; padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
+    #result { margin-top: 30px; font-weight: bold; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Mini-BESTest</h1>
+  <p>Bitte für jede der 14 Aufgaben die Bewertung laut Anleitung auswählen.</p>
+
+  <form id="miniBESTForm">
+<div class="question-block">
+  <label for="q1">1. Vom Sitzen zum Stehen</label>
+  <select name="q1" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Kann nicht ohne Unterstützung aufstehen oder benötigt mehrere Versuche mit Einsatz der Hände.</option>
+    <option value="1">1 – Kommt beim ersten Versuch mit Einsatz der Hände in den Stand.</option>
+    <option value="2">2 – Steht ohne Einsatz der Hände auf und stabilisiert sich selbstständig.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q2">2. Auf die Zehenspitzen stellen</label>
+  <select name="q2" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Nicht möglich.</option>
+    <option value="1">1 – Fersen sind vom Boden abgehoben, aber nicht in vollem Ausmaß oder Instabilität während der 3 Sek.</option>
+    <option value="2">2 – Stabil für 3 Sek. bei maximaler Höhe.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q3">3. Auf einem Bein stehen</label>
+  <select name="q3" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Nicht möglich.</option>
+    <option value="1">1 – Weniger als 20 Sek.</option>
+    <option value="2">2 – 20 Sek.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q4">4. Schutzschritte vorwärts</label>
+  <select name="q4" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Kein Schritt oder Kontakt mit Untersucher nötig um Sturz zu verhindern.</option>
+    <option value="1">1 – Schutzschritt verzögert, zu kurz oder benötigt verbale Hinweise.</option>
+    <option value="2">2 – Schutzschritt selbständig, schnell und in angemessener Größe.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q5">5. Schutzschritte rückwärts</label>
+  <select name="q5" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Kein Schritt oder Kontakt mit Untersucher nötig.</option>
+    <option value="1">1 – Schutzschritt verzögert, zu kurz oder mit Anleitung.</option>
+    <option value="2">2 – Schutzschritt rückwärts selbständig, angemessen.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q6">6. Schutzschritte seitwärts</label>
+  <select name="q6" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Kein Schritt oder Hilfe nötig.</option>
+    <option value="1">1 – Schutzschritte ineffektiv oder mit Hinweis.</option>
+    <option value="2">2 – Effektive Schutzschritte zur Seite ohne Hilfe.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q7">7. Stand (fester Boden, Augen offen)</label>
+  <select name="q7" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Nicht möglich ohne Hilfe.</option>
+    <option value="1">1 – Instabil, aber steht ohne Hilfe.</option>
+    <option value="2">2 – Stabil für 30 Sek.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q8">8. Stand (Schaumstoff, Augen geschlossen)</label>
+  <select name="q8" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Verlust des Gleichgewichts oder Schritt notwendig.</option>
+    <option value="1">1 – Schwanken oder Unsicherheit.</option>
+    <option value="2">2 – Stabil für 30 Sek.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q9">9. Steigung – Augen geschlossen</label>
+  <select name="q9" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Schritt oder Verlust des Gleichgewichts.</option>
+    <option value="1">1 – Instabil, aber kein Schritt.</option>
+    <option value="2">2 – Stabiler Stand auf geneigter Ebene mit geschlossenen Augen.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q10">10. Änderung der Gehgeschwindigkeit</label>
+  <select name="q10" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Unsicher, Schrittfehler oder Hilfe nötig.</option>
+    <option value="1">1 – Leichte Unsicherheit oder unklare Änderung.</option>
+    <option value="2">2 – Passt Tempo gut an ohne zu stolpern.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q11">11. Gehen mit Kopfdrehungen</label>
+  <select name="q11" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Unsicher oder Stoppen notwendig.</option>
+    <option value="1">1 – Leichte Unsicherheit oder verlangsamte Bewegung.</option>
+    <option value="2">2 – Dreht Kopf flüssig und sicher während des Gehens.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q12">12. Gehen mit Körperdrehung</label>
+  <select name="q12" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Stoppen oder Hilfe nötig.</option>
+    <option value="1">1 – Verlangsamung oder kleinere Unsicherheiten.</option>
+    <option value="2">2 – Dreht Körper sicher beim Gehen.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q13">13. Gehen über ein Hindernis</label>
+  <select name="q13" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Stolpert oder Hilfe nötig.</option>
+    <option value="1">1 – Berührt das Hindernis leicht.</option>
+    <option value="2">2 – Überquert Hindernis sicher ohne zu berühren.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q14">14. TUG mit Dual Task</label>
+  <select name="q14" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="0">0 – Stoppt oder kann Dual Task nicht durchführen.</option>
+    <option value="1">1 – Leichte Unsicherheiten oder Ablenkung.</option>
+    <option value="2">2 – Führt TUG und kognitive Aufgabe gleichzeitig sicher durch.</option>
+  </select>
+</div>
+
+    <button type="button" onclick="calculateScore()">✅ Score berechnen</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    function calculateScore() {
+      let total = 0;
+      for (let i = 1; i <= 14; i++) {
+        const sel = document.querySelector(`select[name='q${i}']`);
+        if (!sel || sel.value === "") {
+          alert("Bitte alle Aufgaben ausfüllen.");
+          return;
+        }
+        total += parseInt(sel.value);
+      }
+      document.getElementById("result").innerText = "Mini-BESTest Gesamtscore: " + total + " / 28";
+    }
+  </script>
+</body>
+</html>
