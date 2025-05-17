@@ -1,0 +1,356 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Assessments nach Bereichen</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
+    h1 { text-align: center; }
+    h2 { margin-top: 2rem; color: #2c3e50; }
+    ul { list-style-type: none; padding-left: 0; }
+    li { margin: 5px 0; }
+    a { text-decoration: none; color: #0074D9; }
+    a:hover { text-decoration: underline; }
+    #searchInput {
+      width: 100%; padding: 12px; margin: 20px 0;
+      border: 1px solid #ccc; border-radius: 4px;
+      font-size: 1rem;
+    }
+    #suggestions {
+      background: white; border: 1px solid #ccc;
+      display: none; position: absolute; width: 100%;
+      max-width: 600px; z-index: 10;
+    }
+    .suggestion-item {
+      padding: 10px; cursor: pointer;
+    }
+    .suggestion-item:hover {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Assessments nach Bereichen</h1>
+  <input type="text" id="searchInput" placeholder="Suche nach Assessment oder Bereich...">
+  <div id="suggestions" class="search-container"></div>
+
+<h2>Kraft</h2>
+<ul class='assessment-list'>
+<li><a href="files/1MSTS.html">1MSTS</a></li>
+<li><a href="files/30s_assissted.html">30s_assissted</a></li>
+<li><a href="files/5xsit-stand.html">5xsit-stand</a></li>
+</ul>
+<h2>Gleichgewicht</h2>
+<ul class='assessment-list'>
+<li><a href="files/BBS.html">BBS</a></li>
+<li><a href="files/FSST.html">FSST</a></li>
+<li><a href="files/tinetti.html">tinetti</a></li>
+<li><a href="files/FES-I.html">FES-I</a></li>
+</ul>
+<h2>Mobilität / Gang</h2>
+<ul class='assessment-list'>
+<li><a href="files/DEMMI.html">DEMMI</a></li>
+<li><a href="files/sppb.html">sppb</a></li>
+<li><a href="files/Gaitspeed.html">Gaitspeed</a></li>
+<li><a href="files/tinetti.html">tinetti</a></li>
+<li><a href="files/TUG.html">TUG</a></li>
+</ul>
+<h2>Ausdauer</h2>
+<ul class='assessment-list'>
+<li><a href="files/2MST.html">2MST</a></li>
+<li><a href="files/1MSST.html">2MST</a></li>
+</ul>
+<h2>Neurologie</h2>
+<ul class='assessment-list'>
+<li><a href="files/FiST.html">FiST</a></li>
+<li><a href="files/trunk_impairment_scale.html">trunk_impairment_scale</a></li>
+<li><a href="files/FOG.html">FOG</a></li>
+<li><a href="files/FSMC.html">FSMC</a></li>
+<li><a href="files/SARA.html">SARA</a></li>
+</ul>
+<h2>Mental & Kognition</h2>
+<ul class='assessment-list'>
+<li><a href="files/Braincheck.html">Braincheck</a></li>
+<li><a href="files/GDS.html">GDS</a></li>
+<li><a href="files/ISI.html">ISI</a></li>
+</ul>
+<h2>Weitere</h2>
+<ul class='assessment-list'>
+<li><a href="files/MCTSIB.html">MCTSIB</a></li>
+<li><a href="files/WGFP.html">WGFP</a></li>
+</ul>
+
+<div id="suggestions" class="search-container" style="display:none; position:absolute; background:white; border:1px solid #ccc; width:100%; max-width:600px; z-index:10;"></div>
+<script>
+  const files = [
+  {
+    "name": "ISI",
+    "file": "files/ISI.html",
+    "tags": [
+      "schlaf",
+      "insomnie",
+      "schlafst\u00f6rung",
+      "geriatrie",
+      "alter"
+    ]
+  },
+  {
+    "name": "Braincheck",
+    "file": "files/Braincheck.html",
+    "tags": [
+      "kognition",
+      "demenz",
+      "screening",
+      "Kognition",
+      "Ged\u00e4chtniss",
+      "geriatrie",
+      "alter"
+    ]
+  },
+  {
+    "name": "GDS",
+    "file": "files/GDS.html",
+    "tags": [
+      "depression",
+      "psychisch",
+      "screening",
+      "mental",
+      "stimmung",
+      "psyche",
+      "geriatrie",
+      "alter"
+    ]
+  },
+  {
+    "name": "SPPB",
+    "file": "files/sppb.html",
+    "tags": [
+      "standard",
+      "mobilit\u00e4t",
+      "kraft",
+      "balance",
+      "gehen",
+      "geriatrie",
+      "alter",
+      "neurologie",
+      "msk",
+      "muskuloskelletal"
+    ]
+  },
+  {
+    "name": "DEMMI",
+    "file": "files/DEMMI.html",
+    "tags": [
+      "mobilit\u00e4t",
+      "standard",
+      "bewegung",
+      "transfert",
+      "bett",
+      "bewegungs\u00fcberg\u00e4nge",
+      "geriatrie",
+      "alter",
+      "neurologie",
+      "msk",
+      "muskuloskelletal"
+    ]
+  },
+  {
+    "name": "Gaitspeed",
+    "file": "files/Gaitspeed.html",
+    "tags": [
+      "geschwindigkeit",
+      "gang",
+      "mobilit\u00e4t",
+      "geriatrie",
+      "alter",
+      "neurologie",
+      "msk",
+      "muskuloskelletal"
+    ]
+  },
+  {
+    "name": "Tinetti",
+    "file": "files/tinetti.html",
+    "tags": [
+      "gang",
+      "gleichgewicht",
+      "sturzrisiko",
+      "geriatrie",
+      "alter"
+    ]
+  },
+  {
+    "name": "5x sit-stand",
+    "file": "files/5xsit-stand.html",
+    "tags": [
+      "kraft",
+      "untere extremit\u00e4t",
+      "mobilit\u00e4t",
+      "sitz-stand",
+      "aufstehen",
+      "geriatrie",
+      "alter",
+      "neurologie",
+      "msk",
+      "muskuloskelletal"
+    ]
+  },
+  {
+    "name": "30s assisted sit-stand",
+    "file": "files/30s_assissted.html",
+    "tags": [
+      "kraft",
+      "untere extremit\u00e4t",
+      "mobilit\u00e4t",
+      "sitz-stand",
+      "aufstehen",
+      "geriatrie",
+      "alter",
+      "neurologie",
+      "msk",
+      "muskuloskelletal"
+    ]
+  },
+  {
+    "name": "FSMC",
+    "file": "files/FSMC.html",
+    "tags": [
+      "fatigue",
+      "neurologie",
+      "m\u00fcdigkeit"
+    ]
+  },
+  {
+    "name": "SARA",
+    "file": "files/SARA.html",
+    "tags": [
+      "ataxie",
+      "koordination",
+      "neurologie"
+    ]
+  },
+  {
+    "name": "Trunk Impairment Scale",
+    "file": "files/trunk_impairment_scale.html",
+    "tags": [
+      "rumpf",
+      "neurologie",
+      "gleichgewicht",
+      "stabilit\u00e4t",
+      "CVI",
+      "schlaganfall"
+    ]
+  },
+  {
+    "name": "PSFS / GAS",
+    "file": "files/PSFS_GAS.html",
+    "tags": [
+      "ziel",
+      "funktion",
+      "individualisiert",
+      "standard",
+      "geriatrie",
+      "alter",
+      "neurologie"
+    ]
+  },
+  {
+    "name": "Function in Sitting Test",
+    "file": "files/FiST.html",
+    "tags": [
+      "sitzen",
+      "balance",
+      "neurologie",
+      "gleichgewicht",
+      "schlaganfall",
+      "standard"
+    ]
+  },
+  {
+    "name": "TUG",
+    "file": "files/TUG.html",
+    "tags": [
+      "mobilit\u00e4t",
+      "gang",
+      "gleichgewicht",
+      "sturzrisiko",
+      "geriatrie",
+      "alter",
+      "neurologie"
+    ]
+  },
+  {
+    "name": "BBS",
+    "file": "files/BBS.html",
+    "tags": [
+      "gleichgewicht",
+      "sturzrisiko",
+      "balance",
+      "berg balance scale",
+      "short form",
+      "geriatrie",
+      "alter",
+      "neurologie"
+    ]
+  },
+  {
+    "name": "FSST",
+    "file": "files/FSST.html",
+    "tags": [
+      "balance",
+      "reaktion",
+      "koordination",
+      "schritte",
+      "gleichgewicht",
+      "sturzgefahr",
+      "geriatrie",
+      "alter",
+      "neurologie"
+    ]
+  }
+];
+  const input = document.getElementById('searchInput');
+  const suggestionsBox = document.getElementById('suggestions');
+
+  input.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase();
+    suggestionsBox.innerHTML = '';
+
+    if (query.length < 3) {
+      suggestionsBox.style.display = 'none';
+      return;
+    }
+
+    const matches = files.filter(item =>
+      item.name.toLowerCase().includes(query) ||
+      item.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+
+    if (matches.length === 0) {
+      suggestionsBox.style.display = 'none';
+      return;
+    }
+
+    matches.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'suggestion-item';
+      div.style.padding = '10px';
+      div.style.cursor = 'pointer';
+      div.innerHTML = `<strong>${item.name}</strong> <small style="color:gray;">(${item.tags.join(', ')})</small>`;
+      div.onclick = () => window.location.href = item.file;
+      suggestionsBox.appendChild(div);
+    });
+
+    suggestionsBox.style.display = 'block';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-container') && e.target !== input) {
+      suggestionsBox.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
