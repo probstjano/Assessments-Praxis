@@ -1,55 +1,82 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <title>Assessments nach Bereichen</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
-    h1 { text-align: center; }
-    h2 { margin-top: 2rem; color: #2c3e50; }
-    ul { list-style-type: none; padding-left: 0; }
-    li { margin: 5px 0; }
-    a { text-decoration: none; color: #0074D9; }
-    a:hover { text-decoration: underline; }
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
     #searchInput {
-      width: 100%; padding: 12px; margin: 20px 0;
-      border: 1px solid #ccc; border-radius: 4px;
+      width: 100%;
+      padding: 12px;
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
       font-size: 1rem;
     }
+
     #suggestions {
-      background: white; border: 1px solid #ccc;
-      display: none; position: absolute; width: 100%;
-      max-width: 600px; z-index: 10;
+      background: white;
+      border: 1px solid #ccc;
+      display: none;
+      position: absolute;
+      width: 100%;
+      max-width: 600px;
+      z-index: 10;
     }
+
     .suggestion-item {
-      padding: 10px; cursor: pointer;
+      padding: 10px;
+      cursor: pointer;
     }
+
     .suggestion-item:hover {
       background-color: #eee;
     }
 
+    .assessment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .assessment-section {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .assessment-section h2 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+
     .assessment-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 8px;
-  padding-left: 0;
-  list-style-type: none;
-}
-.assessment-list li {
-  background: white;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-.assessment-list li a {
-  display: block;
-  color: #0074D9;
-  text-decoration: none;
-}
-.assessment-list li a:hover {
-  text-decoration: underline;
-}
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .assessment-list li {
+      margin: 6px 0;
+    }
+
+    .assessment-list a {
+      text-decoration: none;
+      color: #0074D9;
+    }
+
+    .assessment-list a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -57,320 +84,134 @@
   <input type="text" id="searchInput" placeholder="Suche nach Assessment oder Bereich...">
   <div id="suggestions" class="search-container"></div>
 
-<h2>Kraft</h2>
-<ul class='assessment-list'>
-<li><a href="files/5xsit-stand.html">5xsit-stand</a></li>
-<li><a href="files/30s_assissted.html">30s assissted sit-stand</a></li>
-</ul>
-<h2>Gleichgewicht</h2>
-<ul class='assessment-list'>
-<li><a href="files/BBS.html">Berg Balance Scale (BBS) & short form BBS </a></li>
-<li><a href="files/FSST.html"> Four Square Step-Test & Modified </a></li>
-<li><a href="files/tinetti.html"> Tinette/POMA </a></li>
-<li><a href="files/FES-I.html"> Falls Efficacy Scale - International (FES-I)</a></li>
-</ul>
-<h2>Mobilität / Gang</h2>
-<ul class='assessment-list'>
-<li><a href="files/DEMMI.html">De Morton Mobility Index (DEMMI)</a></li>
-<li><a href="files/sppb.html"> Short Physical Performance Battery (SPPB) </a></li>
-<li><a href="files/Gaitspeed.html">Gehgeschwindigkeit </a></li>
-<li><a href="files/tinetti.html"> Tinetti/POMA </a></li>
-<li><a href="files/TUG.html">Timed "Up and Go" (TUG) </a></li>
-</ul>
-<h2>Ausdauer</h2>
-<ul class='assessment-list'>
-<li><a href="files/2MST.html">2min Step-Test</a></li>
-<li><a href="files/1MSST.html">1min Sit-Stand</a></li>
-</ul>
-<h2>Neurologie</h2>
-<ul class='assessment-list'>
-<li><a href="files/FiST.html">Function in Sitting Test (FiST) </a></li>
-<li><a href="files/trunk_impairment_scale.html">Trunk Impairment Scale</a></li>
-<li><a href="files/FOG.html">Freezing of Gait (FOG)</a></li>
-<li><a href="files/FSMC.html">Fatigue Skala für Motorik und Kognition (FSMC) </a></li>
-<li><a href="files/SARA.html">Scale for Assessment and Rating of Ataxia (SARA) </a></li>
-</ul>
-<h2>Mental & Kognition</h2>
-<ul class='assessment-list'>
-<li><a href="files/Braincheck.html">Braincheck Memory Klinik Basel </a></li>
-<li><a href="files/GDS.html"> Geriatric Depression Scale (GDS-15) </a></li>
-<li><a href="files/ISI.html">Insomnia Severity Index (ISI) </a></li>
-</ul>
-<h2>Weitere</h2>
-<ul class='assessment-list'>
-<li><a href="files/MCTSIB.html"> Modifie Clinical Test of Sensory Interaction on Balance (CTSIB) </a></li>
-</ul>
+  <div class="assessment-grid">
+    <div class="assessment-section">
+      <h2>Kraft</h2>
+      <ul class="assessment-list">
+        <li><a href="files/5xsit-stand.html">5x Sit-to-Stand</a></li>
+        <li><a href="files/30s_assissted.html">30s Assisted Sit-to-Stand</a></li>
+      </ul>
+    </div>
 
-<div id="suggestions" class="search-container" style="display:none; position:absolute; background:white; border:1px solid #ccc; width:100%; max-width:600px; z-index:10;"></div>
-<script>
-  const files = [
-  {
-    "name": "ISI",
-    "file": "files/ISI.html",
-    "tags": [
-      "schlaf",
-      "insomnie",
-      "schlafst\u00f6rung",
-      "geriatrie",
-      "alter"
-    ]
-  },
-  {
-    "name": "Braincheck",
-    "file": "files/Braincheck.html",
-    "tags": [
-      "kognition",
-      "demenz",
-      "screening",
-      "Kognition",
-      "Ged\u00e4chtniss",
-      "geriatrie",
-      "alter"
-    ]
-  },
-  {
-    "name": "GDS",
-    "file": "files/GDS.html",
-    "tags": [
-      "depression",
-      "psychisch",
-      "screening",
-      "mental",
-      "stimmung",
-      "psyche",
-      "geriatrie",
-      "alter"
-    ]
-  },
-  {
-    "name": "SPPB",
-    "file": "files/sppb.html",
-    "tags": [
-      "standard",
-      "mobilit\u00e4t",
-      "kraft",
-      "balance",
-      "gehen",
-      "geriatrie",
-      "alter",
-      "neurologie",
-      "msk",
-      "muskuloskelletal"
-    ]
-  },
-  {
-    "name": "DEMMI",
-    "file": "files/DEMMI.html",
-    "tags": [
-      "mobilit\u00e4t",
-      "standard",
-      "bewegung",
-      "transfert",
-      "bett",
-      "bewegungs\u00fcberg\u00e4nge",
-      "geriatrie",
-      "alter",
-      "neurologie",
-      "msk",
-      "muskuloskelletal"
-    ]
-  },
-  {
-    "name": "Gaitspeed",
-    "file": "files/Gaitspeed.html",
-    "tags": [
-      "geschwindigkeit",
-      "gang",
-      "mobilit\u00e4t",
-      "geriatrie",
-      "alter",
-      "neurologie",
-      "msk",
-      "muskuloskelletal"
-    ]
-  },
-  {
-    "name": "Tinetti",
-    "file": "files/tinetti.html",
-    "tags": [
-      "gang",
-      "gleichgewicht",
-      "sturzrisiko",
-      "geriatrie",
-      "alter"
-    ]
-  },
-  {
-    "name": "5x sit-stand",
-    "file": "files/5xsit-stand.html",
-    "tags": [
-      "kraft",
-      "untere extremit\u00e4t",
-      "mobilit\u00e4t",
-      "sitz-stand",
-      "aufstehen",
-      "geriatrie",
-      "alter",
-      "neurologie",
-      "msk",
-      "muskuloskelletal"
-    ]
-  },
-  {
-    "name": "30s assisted sit-stand",
-    "file": "files/30s_assissted.html",
-    "tags": [
-      "kraft",
-      "untere extremit\u00e4t",
-      "mobilit\u00e4t",
-      "sitz-stand",
-      "aufstehen",
-      "geriatrie",
-      "alter",
-      "neurologie",
-      "msk",
-      "muskuloskelletal"
-    ]
-  },
-  {
-    "name": "FSMC",
-    "file": "files/FSMC.html",
-    "tags": [
-      "fatigue",
-      "neurologie",
-      "m\u00fcdigkeit"
-    ]
-  },
-  {
-    "name": "SARA",
-    "file": "files/SARA.html",
-    "tags": [
-      "ataxie",
-      "koordination",
-      "neurologie"
-    ]
-  },
-  {
-    "name": "Trunk Impairment Scale",
-    "file": "files/trunk_impairment_scale.html",
-    "tags": [
-      "rumpf",
-      "neurologie",
-      "gleichgewicht",
-      "stabilit\u00e4t",
-      "CVI",
-      "schlaganfall"
-    ]
-  },
-  {
-    "name": "PSFS / GAS",
-    "file": "files/PSFS_GAS.html",
-    "tags": [
-      "ziel",
-      "funktion",
-      "individualisiert",
-      "standard",
-      "geriatrie",
-      "alter",
-      "neurologie"
-    ]
-  },
-  {
-    "name": "Function in Sitting Test",
-    "file": "files/FiST.html",
-    "tags": [
-      "sitzen",
-      "balance",
-      "neurologie",
-      "gleichgewicht",
-      "schlaganfall",
-      "standard"
-    ]
-  },
-  {
-    "name": "TUG",
-    "file": "files/TUG.html",
-    "tags": [
-      "mobilit\u00e4t",
-      "gang",
-      "gleichgewicht",
-      "sturzrisiko",
-      "geriatrie",
-      "alter",
-      "neurologie"
-    ]
-  },
-  {
-    "name": "BBS",
-    "file": "files/BBS.html",
-    "tags": [
-      "gleichgewicht",
-      "sturzrisiko",
-      "balance",
-      "berg balance scale",
-      "short form",
-      "geriatrie",
-      "alter",
-      "neurologie"
-    ]
-  },
-  {
-    "name": "FSST",
-    "file": "files/FSST.html",
-    "tags": [
-      "balance",
-      "reaktion",
-      "koordination",
-      "schritte",
-      "gleichgewicht",
-      "sturzgefahr",
-      "geriatrie",
-      "alter",
-      "neurologie"
-    ]
-  }
-];
-  const input = document.getElementById('searchInput');
-  const suggestionsBox = document.getElementById('suggestions');
+    <div class="assessment-section">
+      <h2>Gleichgewicht</h2>
+      <ul class="assessment-list">
+        <li><a href="files/BBS.html">Berg Balance Scale (BBS)</a></li>
+        <li><a href="files/FSST.html">Four Square Step-Test</a></li>
+        <li><a href="files/tinetti.html">Tinetti / POMA</a></li>
+        <li><a href="files/FES-I.html">Falls Efficacy Scale – International (FES-I)</a></li>
+      </ul>
+    </div>
 
-  input.addEventListener('input', () => {
-    const query = input.value.trim().toLowerCase();
-    suggestionsBox.innerHTML = '';
+    <div class="assessment-section">
+      <h2>Mobilität / Gang</h2>
+      <ul class="assessment-list">
+        <li><a href="files/DEMMI.html">De Morton Mobility Index (DEMMI)</a></li>
+        <li><a href="files/sppb.html">Short Physical Performance Battery (SPPB)</a></li>
+        <li><a href="files/Gaitspeed.html">Gehgeschwindigkeit</a></li>
+        <li><a href="files/tinetti.html">Tinetti / POMA</a></li>
+        <li><a href="files/TUG.html">Timed Up and Go (TUG)</a></li>
+      </ul>
+    </div>
 
-    if (query.length < 3) {
-      suggestionsBox.style.display = 'none';
-      return;
-    }
+    <div class="assessment-section">
+      <h2>Ausdauer</h2>
+      <ul class="assessment-list">
+        <li><a href="files/2MST.html">2-Minuten Step-Test</a></li>
+        <li><a href="files/1MSST.html">1-Minuten Sit-to-Stand</a></li>
+      </ul>
+    </div>
 
-    const matches = files.filter(item =>
-      item.name.toLowerCase().includes(query) ||
-      item.tags.some(tag => tag.toLowerCase().includes(query))
-    );
+    <div class="assessment-section">
+      <h2>Neurologie</h2>
+      <ul class="assessment-list">
+        <li><a href="files/FiST.html">Function in Sitting Test (FiST)</a></li>
+        <li><a href="files/trunk_impairment_scale.html">Trunk Impairment Scale</a></li>
+        <li><a href="files/FOG.html">Freezing of Gait (FOG)</a></li>
+        <li><a href="files/FSMC.html">Fatigue Skala für Motorik und Kognition (FSMC)</a></li>
+        <li><a href="files/SARA.html">Scale for Assessment and Rating of Ataxia (SARA)</a></li>
+      </ul>
+    </div>
 
-    if (matches.length === 0) {
-      suggestionsBox.style.display = 'none';
-      return;
-    }
+    <div class="assessment-section">
+      <h2>Mental & Kognition</h2>
+      <ul class="assessment-list">
+        <li><a href="files/Braincheck.html">Braincheck Memory Klinik Basel</a></li>
+        <li><a href="files/GDS.html">Geriatric Depression Scale (GDS-15)</a></li>
+        <li><a href="files/ISI.html">Insomnia Severity Index (ISI)</a></li>
+      </ul>
+    </div>
 
-    matches.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'suggestion-item';
-      div.style.padding = '10px';
-      div.style.cursor = 'pointer';
-      div.innerHTML = `<strong>${item.name}</strong> <small style="color:gray;">(${item.tags.join(', ')})</small>`;
-      div.onclick = () => window.location.href = item.file;
-      suggestionsBox.appendChild(div);
+    <div class="assessment-section">
+      <h2>Weitere</h2>
+      <ul class="assessment-list">
+        <li><a href="files/MCTSIB.html">Modified Clinical Test of Sensory Interaction on Balance (CTSIB)</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const files = [
+      { name: 'ISI', file: 'files/ISI.html', tags: ['schlaf', 'insomnie', 'schlafstörung', 'geriatrie'] },
+      { name: 'Braincheck', file: 'files/Braincheck.html', tags: ['kognition', 'demenz', 'screening'] },
+      { name: 'GDS', file: 'files/GDS.html', tags: ['depression', 'psyche', 'geriatrie'] },
+      { name: 'SPPB', file: 'files/sppb.html', tags: ['mobilität', 'kraft', 'geriatrie'] },
+      { name: 'DEMMI', file: 'files/DEMMI.html', tags: ['mobilität', 'geriatrie'] },
+      { name: 'Gaitspeed', file: 'files/Gaitspeed.html', tags: ['gang', 'mobilität'] },
+      { name: 'Tinetti', file: 'files/tinetti.html', tags: ['gleichgewicht', 'sturzrisiko'] },
+      { name: '5x sit-stand', file: 'files/5xsit-stand.html', tags: ['kraft', 'aufstehen'] },
+      { name: '30s assisted sit-stand', file: 'files/30s_assissted.html', tags: ['kraft', 'mobilität'] },
+      { name: 'FSMC', file: 'files/FSMC.html', tags: ['fatigue', 'neurologie'] },
+      { name: 'SARA', file: 'files/SARA.html', tags: ['ataxie', 'koordination'] },
+      { name: 'Trunk Impairment Scale', file: 'files/trunk_impairment_scale.html', tags: ['rumpf', 'gleichgewicht'] },
+      { name: 'FiST', file: 'files/FiST.html', tags: ['balance', 'neurologie'] },
+      { name: 'TUG', file: 'files/TUG.html', tags: ['mobilität', 'gleichgewicht'] },
+      { name: 'BBS', file: 'files/BBS.html', tags: ['gleichgewicht', 'sturzrisiko'] },
+      { name: 'FSST', file: 'files/FSST.html', tags: ['balance', 'koordination'] },
+      { name: '2MST', file: 'files/2MST.html', tags: ['ausdauer', 'step', 'herz'] },
+      { name: '1MSST', file: 'files/1MSST.html', tags: ['ausdauer', 'kraft'] },
+      { name: 'FOG', file: 'files/FOG.html', tags: ['gang', 'neurologie'] },
+      { name: 'MCTSIB', file: 'files/MCTSIB.html', tags: ['gleichgewicht', 'sensorik'] }
+    ];
+
+    const input = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    input.addEventListener('input', () => {
+      const query = input.value.trim().toLowerCase();
+      suggestionsBox.innerHTML = '';
+
+      if (query.length < 3) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+
+      const matches = files.filter(item =>
+        item.name.toLowerCase().includes(query) ||
+        item.tags.some(tag => tag.includes(query))
+      );
+
+      if (matches.length === 0) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+
+      matches.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `<strong>${item.name}</strong> <small style="color:gray;">(${item.tags.join(', ')})</small>`;
+        div.onclick = () => window.location.href = item.file;
+        suggestionsBox.appendChild(div);
+      });
+
+      suggestionsBox.style.display = 'block';
     });
 
-    suggestionsBox.style.display = 'block';
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-container') && e.target !== input) {
-      suggestionsBox.style.display = 'none';
-    }
-  });
-</script>
-
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-container')) {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
