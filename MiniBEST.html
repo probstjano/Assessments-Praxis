@@ -166,35 +166,37 @@
   
     <button type="button" onclick="generatePDF()">📄 PDF erstellen</button>
     </form>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-      async function generatePDF() {
-        const {{ jsPDF }} = window.jspdf;
-        const doc = new jsPDF();
-        let y = 10;
-        doc.setFontSize(16);
-        doc.text("Mini-BESTest – Auswertung", 10, y);
-        y += 10;
-        let total = 0;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 10;
+    doc.setFontSize(16);
+    doc.text("Mini-BESTest – Auswertung", 10, y);
+    y += 10;
+    let total = 0;
 
-        for (let i = 1; i <= 14; i++) {
-          const sel = document.querySelector(`select[name='q${i}']`);
-          const text = sel.options[sel.selectedIndex].text;
-          const val = sel.value;
-          total += parseInt(val);
-          doc.setFontSize(12);
-          doc.text(`${i}. ${text}`, 10, y);
-          y += 10;
-          if (y > 270) {{
-            doc.addPage();
-            y = 10;
-          }}
-        }
-        doc.setFontSize(14);
-        doc.text(`Gesamtscore: ${total} / 28`, 10, y + 10);
-        doc.save("MiniBEST_Auswertung.pdf");
+    for (let i = 1; i <= 14; i++) {
+      const sel = document.querySelector(`select[name='q${i}']`);
+      const text = sel.options[sel.selectedIndex].text;
+      const val = sel.value;
+      total += parseInt(val);
+      doc.setFontSize(12);
+      doc.text(`${i}. ${text}`, 10, y);
+      y += 10;
+      if (y > 270) {
+        doc.addPage();
+        y = 10;
       }
-    </script>
+    }
+
+    doc.setFontSize(14);
+    doc.text(`Gesamtscore: ${total} / 28`, 10, y + 10);
+    doc.save("MiniBEST_Auswertung.pdf");
+  }
+</script>
+
     
   <div id="result"></div>
   <script>
