@@ -2,140 +2,128 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>6-Minuten-Gehtest Auswertung</title>
+  <title>6-Minuten-Gehtest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f8f8f8; }
+    body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; background: #f4f4f4; }
     h1 { text-align: center; }
-    .input-block { margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; }
-    input { width: 100%; padding: 8px; font-size: 16px; margin-bottom: 10px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
-    #result { margin-top: 30px; font-weight: bold; font-size: 18px; }
-    .warn { color: red; }
+    label, input, button { display: block; width: 100%; margin: 10px 0; font-size: 16px; }
+    #result { margin-top: 20px; font-weight: bold; font-size: 18px; }
   </style>
 </head>
 <body>
-  <h1>6-Minuten-Gehtest Auswertung</h1>
+  <h1>6-Minuten-Gehtest Normwert-Rechner</h1>
+  <label for="distance">Zurückgelegte Distanz (in Metern):</label>
+  <input type="number" id="distance" required>
 
-  <div class="input-block">
-    <label for="distance">Distanz (Meter):</label>
-    <input type="number" id="distance" min="0" required>
-  </div>
+  <label for="age">Alter (in Jahren):</label>
+  <input type="number" id="age" required>
 
-  <div class="input-block">
-    <label for="age">Alter (Jahre):</label>
-    <input type="number" id="age" min="30" max="100" required>
-  </div>
+  <label for="height">Körpergröße (in cm):</label>
+  <input type="number" id="height" required>
 
-  <div class="input-block">
-    <label for="height">Größe (cm):</label>
-    <input type="number" id="height" min="140" max="200" required>
-  </div>
-
-  <button onclick="evaluate()">✅ Normwert berechnen</button>
-  <button onclick="generatePDF()">📄 PDF erstellen</button>
+  <button onclick="calculatePercentile()">✅ Normwert berechnen</button>
 
   <div id="result"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const rawPercentiles = {
-      150: { 30: [470, 511, 555, 592, 631], 40: [468, 509, 553, 590, 629], 50: [448, 489, 533, 570, 609], 60: [397, 439, 483, 520, 558], 70: [347, 388, 432, 469, 508], 80: [null, null, null, null, null] },
-      160: { 30: [489, 530, 574, 611, 650], 40: [487, 528, 572, 609, 648], 50: [466, 508, 552, 588, 627], 60: [416, 457, 501, 538, 577], 70: [366, 407, 451, 488, 526], 80: [316, 357, 401, 438, 476] },
-      170: { 30: [507, 549, 593, 629, 668], 40: [505, 546, 590, 627, 666], 50: [485, 526, 570, 607, 646], 60: [435, 476, 520, 557, 595], 70: [384, 425, 469, 506, 545], 80: [334, 375, 419, 456, 495] },
-      180: { 30: [526, 567, 611, 648, 687], 40: [524, 565, 609, 646, 685], 50: [503, 545, 589, 626, 664], 60: [453, 494, 538, 575, 614], 70: [403, 444, 488, 525, 564], 80: [353, 394, 438, 475, 513] },
-      190: { 30: [544, 586, 630, 667, 705], 40: [542, 584, 628, 665, 703], 50: [522, 563, 607, 644, 683], 60: [472, 513, 557, 594, 633], 70: [421, 463, 507, 544, 582], 80: [371, 413, 457, 494, 532] }
+      150: {
+        30: [436, 470, 511, 555, 592, 631, 679],
+        40: [434, 468, 509, 553, 590, 629, 677],
+        50: [414, 448, 489, 533, 570, 609, 656],
+        60: [364, 397, 439, 483, 520, 558, 606],
+        70: [313, 347, 388, 432, 469, 508, 556],
+        80: [281, 313, 355, 399, 436, 475, 523]
+      },
+      160: {
+        30: [455, 489, 530, 574, 611, 650, 697],
+        40: [453, 487, 528, 572, 609, 648, 695],
+        50: [433, 466, 508, 552, 588, 627, 675],
+        60: [382, 416, 457, 501, 538, 577, 625],
+        70: [332, 366, 407, 451, 488, 526, 574],
+        80: [300, 332, 374, 418, 455, 493, 541]
+      },
+      170: {
+        30: [474, 507, 549, 593, 629, 668, 716],
+        40: [472, 505, 546, 590, 627, 666, 714],
+        50: [451, 485, 526, 570, 607, 646, 694],
+        60: [401, 435, 476, 520, 557, 595, 643],
+        70: [351, 384, 425, 469, 506, 545, 593],
+        80: [319, 351, 393, 437, 474, 513, 561]
+      },
+      180: {
+        30: [492, 526, 567, 611, 648, 687, 735],
+        40: [490, 524, 565, 609, 646, 685, 733],
+        50: [470, 503, 545, 589, 626, 664, 712],
+        60: [419, 453, 494, 538, 575, 614, 662],
+        70: [369, 403, 444, 488, 525, 564, 611],
+        80: [337, 369, 411, 455, 492, 530, 578]
+      },
+      190: {
+        30: [511, 544, 586, 630, 667, 705, 753],
+        40: [509, 542, 584, 628, 665, 703, 751],
+        50: [488, 522, 563, 607, 644, 683, 731],
+        60: [438, 472, 513, 557, 594, 633, 680],
+        70: [388, 421, 463, 507, 544, 582, 630],
+        80: [356, 388, 430, 474, 511, 549, 597]
+      }
     };
-    const percentiles = [10, 25, 50, 75, 90];
 
-    function interpolate(val, x1, x2, y1, y2) {
-      return y1 + (val - x1) * (y2 - y1) / (x2 - x1);
+    function interpolate(val, lower, upper, wLower, wUpper) {
+      return wLower * val[lower] + wUpper * val[upper];
     }
 
-    function findBounds(val, arr) {
-      let lower = arr[0];
-      let upper = arr[arr.length - 1];
-      for (let i = 0; i < arr.length - 1; i++) {
-        if (val >= arr[i] && val <= arr[i + 1]) {
-          lower = arr[i];
-          upper = arr[i + 1];
-          break;
+    function findNearestBounds(value, array) {
+      const sorted = [...array].sort((a, b) => a - b);
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (value >= sorted[i] && value <= sorted[i + 1]) {
+          return [sorted[i], sorted[i + 1]];
         }
       }
-      return [lower, upper];
+      return value < sorted[0] ? [sorted[0], sorted[0]] : [sorted[sorted.length - 2], sorted[sorted.length - 1]];
     }
 
-    function evaluate() {
-      const dist = parseFloat(document.getElementById('distance').value);
-      const age = parseFloat(document.getElementById('age').value);
-      const height = parseFloat(document.getElementById('height').value);
-      const output = document.getElementById("result");
+    function calculatePercentile() {
+      const dist = parseFloat(document.getElementById("distance").value);
+      const age = parseFloat(document.getElementById("age").value);
+      const height = parseFloat(document.getElementById("height").value);
+      const result = document.getElementById("result");
 
-      if (isNaN(dist) || isNaN(age) || isNaN(height)) {
-        output.innerHTML = "Bitte alle Felder korrekt ausfüllen.";
-        return;
-      }
+      const heights = Object.keys(rawPercentiles).map(Number);
+      const [hLow, hHigh] = findNearestBounds(height, heights);
+      const hWeight = (height - hLow) / (hHigh - hLow);
 
-      const ageSteps = [30, 40, 50, 60, 70];
-      const heightSteps = [150, 160, 170, 180, 190];
+      const ages = Object.keys(rawPercentiles[hLow]).map(Number);
+      const [aLow, aHigh] = findNearestBounds(Math.min(age, 80), ages);
+      const aWeight = (Math.min(age, 80) - aLow) / (aHigh - aLow);
 
-      let [ageLow, ageHigh] = findBounds(age, ageSteps);
-      let [heightLow, heightHigh] = findBounds(height, heightSteps);
+      const percentiles = [2.5, 10, 25, 50, 75, 90, 97.5];
+      const interpolated = percentiles.map((_, i) => {
+        const h1a1 = rawPercentiles[hLow][aLow][i];
+        const h1a2 = rawPercentiles[hLow][aHigh][i];
+        const h2a1 = rawPercentiles[hHigh][aLow][i];
+        const h2a2 = rawPercentiles[hHigh][aHigh][i];
 
-      const interp = (pIdx) => {
-        const a1 = rawPercentiles[heightLow]?.[ageLow]?.[pIdx] ?? null;
-        const a2 = rawPercentiles[heightLow]?.[ageHigh]?.[pIdx] ?? null;
-        const b1 = rawPercentiles[heightHigh]?.[ageLow]?.[pIdx] ?? null;
-        const b2 = rawPercentiles[heightHigh]?.[ageHigh]?.[pIdx] ?? null;
-        if ([a1, a2, b1, b2].some(v => v == null)) return null;
-        const val1 = interpolate(age, ageLow, ageHigh, a1, a2);
-        const val2 = interpolate(age, ageLow, ageHigh, b1, b2);
-        return interpolate(height, heightLow, heightHigh, val1, val2);
-      };
+        const lowAge = h1a1 + (h1a2 - h1a1) * aWeight;
+        const highAge = h2a1 + (h2a2 - h2a1) * aWeight;
 
-      let resultText = '';
-      let matchedPercentile = null;
+        return lowAge + (highAge - lowAge) * hWeight;
+      });
 
-      for (let i = percentiles.length - 1; i >= 0; i--) {
-        const est = interp(i);
-        if (est == null) continue;
-        if (dist >= est) {
-          matchedPercentile = percentiles[i];
+      let percentile = "<2.5";
+      for (let i = 0; i < interpolated.length; i++) {
+        if (dist < interpolated[i]) {
+          percentile = `zwischen ${percentiles[i - 1] || 0} und ${percentiles[i]}%`;
           break;
         }
       }
 
-      if (matchedPercentile === null) {
-        matchedPercentile = "<10";
-      }
+      const msg = age > 80
+        ? "<br><strong>Achtung:</strong> Werte basieren auf Interpolation oberhalb des bekannten Bereichs."
+        : "";
 
-      resultText += `Die gemessene Distanz liegt im ${matchedPercentile}. Perzentil. `;
-      resultText += `Die Leistung ist besser als ${matchedPercentile === "<10" ? "weniger als 10" : matchedPercentile}% der Vergleichsgruppe.`;
-
-      if (age > 80) {
-        resultText += `<br><span class="warn">⚠ Achtung: Für Alter >80 liegen keine Normdaten vor. Die Werte basieren auf Extrapolation.</span>`;
-      }
-
-      output.innerHTML = resultText;
-    }
-
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const dist = document.getElementById("distance").value;
-      const age = document.getElementById("age").value;
-      const height = document.getElementById("height").value;
-      const text = document.getElementById("result").innerText;
-
-      doc.setFontSize(16);
-      doc.text("6-Minuten-Gehtest – Auswertung", 10, 20);
-      doc.setFontSize(12);
-      doc.text(`Distanz: ${dist} m`, 10, 40);
-      doc.text(`Alter: ${age} Jahre`, 10, 50);
-      doc.text(`Größe: ${height} cm`, 10, 60);
-      doc.text(text, 10, 80, { maxWidth: 180 });
-      doc.save("6MWT_Auswertung.pdf");
+      result.innerHTML = `Die gemessene Distanz liegt im Bereich: <strong>${percentile}</strong>${msg}`;
     }
   </script>
 </body>
