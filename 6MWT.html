@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>6-Minuten-Gehtest Auswertung</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f4f4f4; }
     label, p { display: block; margin-top: 10px; }
     input, button { padding: 10px; font-size: 16px; margin-top: 5px; width: 100%; box-sizing: border-box; }
-    #result { margin-top: 20px; font-weight: bold; font-size: 18px; }
+    #result { margin-top: 20px; font-weight: bold; font-size: 18px; white-space: pre-line; }
   </style>
 </head>
 <body>
@@ -88,20 +88,27 @@
         return interpolate(height, hLow, hHigh, p0, p1);
       });
 
-      let percentile = "unterhalb des 2.5. Perzentils";
+      let resultText = "";
+      let percentileResult = "";
+
       for (let i = 0; i < interpolated.length; i++) {
         if (dist < interpolated[i]) {
-          percentile = `${percentileLabels[i]}% Perzentil – besser als ${percentileLabels[i - 1] || 0}%`;
+          const lower = i === 0 ? 0 : percentileLabels[i - 1];
+          percentileResult = `Diese Leistung entspricht dem Bereich zwischen dem ${lower}. und ${percentileLabels[i]}. Perzentil.\nBesser als ${lower}% der gesunden Vergleichsgruppe.`;
           break;
         }
       }
-      if (dist > interpolated[interpolated.length - 1]) {
-        percentile = "über dem 97.5. Perzentil – besser als 97.5%";
+
+      if (!percentileResult && dist >= interpolated[interpolated.length - 1]) {
+        percentileResult = `Diese Leistung liegt über dem 97.5. Perzentil.\nBesser als 97.5% der gesunden Vergleichsgruppe.`;
       }
 
-      const warnText = age > 80 ? "⚠️ Achtung: Alter > 80 – interpolierter Wert basierend auf extrapolierten Normdaten.\n" : "";
+      const warnText = age > 80 ? "⚠️ Achtung: Alter > 80 – extrapolierter Normwert basierend auf linearem Trend.\n\n" : "";
+      resultText += warnText;
+      resultText += `Referenzwert (50. Perzentil): ${Math.round(interpolated[3])} m\n`;
+      resultText += percentileResult;
 
-      res.innerText = `${warnText}Normwert (50. Perzentil): ${Math.round(interpolated[3])} m\nDiese Leistung liegt im Bereich: ${percentile}`;
+      res.innerText = resultText;
     }
   </script>
 </body>
