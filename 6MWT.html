@@ -3,135 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <title>6-Minuten-Gehtest Auswertung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; max-width: 800px; margin: auto; }
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f8f8f8; }
     h1 { text-align: center; }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    select, input[type=number] { width: 100%; padding: 8px; margin-top: 5px; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
-    #result { margin-top: 30px; font-size: 1.1rem; font-weight: bold; }
+    .input-block { margin-bottom: 20px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    input { width: 100%; padding: 8px; font-size: 16px; margin-bottom: 10px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+    #result { margin-top: 30px; font-weight: bold; font-size: 18px; }
+    .warn { color: red; }
   </style>
 </head>
 <body>
   <h1>6-Minuten-Gehtest Auswertung</h1>
 
-  <label for="distance">Zurückgelegte Distanz (in m):</label>
-  <input type="number" id="distance" min="0">
+  <div class="input-block">
+    <label for="distance">Distanz (Meter):</label>
+    <input type="number" id="distance" min="0" required>
+  </div>
 
-  <label for="age">Alter:</label>
-  <input type="number" id="age" min="30" max="110">
+  <div class="input-block">
+    <label for="age">Alter (Jahre):</label>
+    <input type="number" id="age" min="30" max="100" required>
+  </div>
 
-  <label for="height">Körpergröße (in cm):</label>
-  <select id="height">
-    <option value="150">140–150 cm</option>
-    <option value="160">151–160 cm</option>
-    <option value="170">161–170 cm</option>
-    <option value="180">171–180 cm</option>
-    <option value="190">181–190 cm</option>
-  </select>
+  <div class="input-block">
+    <label for="height">Größe (cm):</label>
+    <input type="number" id="height" min="140" max="200" required>
+  </div>
 
-  <button onclick="calculatePercentile()">Normwerte anzeigen</button>
+  <button onclick="evaluate()">✅ Normwert berechnen</button>
+  <button onclick="generatePDF()">📄 PDF erstellen</button>
 
   <div id="result"></div>
 
-<script>
-const table = {
-  "150": {
-    "40": [436, 470, 511, 555, 592, 631, 679],
-    "50": [434, 468, 509, 553, 590, 629, 677],
-    "60": [414, 448, 489, 533, 570, 609, 656],
-    "70": [364, 397, 439, 483, 520, 558, 606],
-    "80": [313, 347, 388, 432, 469, 508, 556]
-  },
-  "160": {
-    "40": [455, 489, 530, 574, 611, 650, 697],
-    "50": [453, 487, 528, 572, 609, 648, 695],
-    "60": [433, 466, 508, 552, 588, 627, 675],
-    "70": [382, 416, 457, 501, 538, 577, 625],
-    "80": [332, 366, 407, 451, 488, 526, 574]
-  },
-  "170": {
-    "40": [474, 507, 549, 593, 629, 668, 716],
-    "50": [472, 505, 546, 590, 627, 666, 714],
-    "60": [451, 485, 526, 570, 607, 646, 694],
-    "70": [401, 435, 476, 520, 557, 595, 643],
-    "80": [351, 384, 425, 469, 506, 545, 593]
-  },
-  "180": {
-    "40": [492, 526, 567, 611, 648, 687, 735],
-    "50": [490, 524, 565, 609, 646, 685, 733],
-    "60": [470, 503, 545, 589, 626, 664, 712],
-    "70": [419, 453, 494, 538, 575, 614, 662],
-    "80": [369, 403, 444, 488, 525, 564, 611]
-  },
-  "190": {
-    "40": [511, 544, 586, 630, 667, 705, 753],
-    "50": [509, 542, 584, 628, 665, 703, 751],
-    "60": [488, 522, 563, 607, 644, 683, 731],
-    "70": [438, 472, 513, 557, 594, 633, 680],
-    "80": [388, 421, 463, 507, 544, 582, 630]
-  }
-};
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const rawPercentiles = {
+      150: { 30: [470, 511, 555, 592, 631], 40: [468, 509, 553, 590, 629], 50: [448, 489, 533, 570, 609], 60: [397, 439, 483, 520, 558], 70: [347, 388, 432, 469, 508], 80: [null, null, null, null, null] },
+      160: { 30: [489, 530, 574, 611, 650], 40: [487, 528, 572, 609, 648], 50: [466, 508, 552, 588, 627], 60: [416, 457, 501, 538, 577], 70: [366, 407, 451, 488, 526], 80: [316, 357, 401, 438, 476] },
+      170: { 30: [507, 549, 593, 629, 668], 40: [505, 546, 590, 627, 666], 50: [485, 526, 570, 607, 646], 60: [435, 476, 520, 557, 595], 70: [384, 425, 469, 506, 545], 80: [334, 375, 419, 456, 495] },
+      180: { 30: [526, 567, 611, 648, 687], 40: [524, 565, 609, 646, 685], 50: [503, 545, 589, 626, 664], 60: [453, 494, 538, 575, 614], 70: [403, 444, 488, 525, 564], 80: [353, 394, 438, 475, 513] },
+      190: { 30: [544, 586, 630, 667, 705], 40: [542, 584, 628, 665, 703], 50: [522, 563, 607, 644, 683], 60: [472, 513, 557, 594, 633], 70: [421, 463, 507, 544, 582], 80: [371, 413, 457, 494, 532] }
+    };
+    const percentiles = [10, 25, 50, 75, 90];
 
-const percentiles = [2.5, 10, 25, 50, 75, 90, 97.5];
+    function interpolate(val, x1, x2, y1, y2) {
+      return y1 + (val - x1) * (y2 - y1) / (x2 - x1);
+    }
 
-function linearInterpolate(x, x0, x1, y0, y1) {
-  return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
-}
-
-function calculatePercentile() {
-  const distance = parseFloat(document.getElementById('distance').value);
-  const age = parseFloat(document.getElementById('age').value);
-  const height = document.getElementById('height').value;
-  const resultDiv = document.getElementById('result');
-
-  if (isNaN(distance) || isNaN(age)) {
-    resultDiv.innerText = "Bitte gültige Werte für Distanz und Alter eingeben.";
-    return;
-  }
-
-  const ageGroups = [40, 50, 60, 70, 80];
-  let ageLow = 40, ageHigh = 80;
-
-  if (age < 40) ageLow = ageHigh = 40;
-  else if (age > 80) {
-    ageLow = 70; ageHigh = 80;
-  } else {
-    for (let i = 0; i < ageGroups.length - 1; i++) {
-      if (age >= ageGroups[i] && age < ageGroups[i + 1]) {
-        ageLow = ageGroups[i];
-        ageHigh = ageGroups[i + 1];
-        break;
+    function findBounds(val, arr) {
+      let lower = arr[0];
+      let upper = arr[arr.length - 1];
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (val >= arr[i] && val <= arr[i + 1]) {
+          lower = arr[i];
+          upper = arr[i + 1];
+          break;
+        }
       }
+      return [lower, upper];
     }
-  }
 
-  const group = table[height];
-  const interpolated = [];
+    function evaluate() {
+      const dist = parseFloat(document.getElementById('distance').value);
+      const age = parseFloat(document.getElementById('age').value);
+      const height = parseFloat(document.getElementById('height').value);
+      const output = document.getElementById("result");
 
-  for (let i = 0; i < percentiles.length; i++) {
-    const y0 = group[ageLow][i];
-    const y1 = group[ageHigh][i];
-    const value = linearInterpolate(age, ageLow, ageHigh, y0, y1);
-    interpolated.push(value);
-  }
+      if (isNaN(dist) || isNaN(age) || isNaN(height)) {
+        output.innerHTML = "Bitte alle Felder korrekt ausfüllen.";
+        return;
+      }
 
-  let perc = 0;
-  for (let i = 0; i < interpolated.length; i++) {
-    if (distance < interpolated[i]) {
-      perc = i === 0 ? 1 : percentiles[i - 1];
-      break;
+      const ageSteps = [30, 40, 50, 60, 70];
+      const heightSteps = [150, 160, 170, 180, 190];
+
+      let [ageLow, ageHigh] = findBounds(age, ageSteps);
+      let [heightLow, heightHigh] = findBounds(height, heightSteps);
+
+      const interp = (pIdx) => {
+        const a1 = rawPercentiles[heightLow]?.[ageLow]?.[pIdx] ?? null;
+        const a2 = rawPercentiles[heightLow]?.[ageHigh]?.[pIdx] ?? null;
+        const b1 = rawPercentiles[heightHigh]?.[ageLow]?.[pIdx] ?? null;
+        const b2 = rawPercentiles[heightHigh]?.[ageHigh]?.[pIdx] ?? null;
+        if ([a1, a2, b1, b2].some(v => v == null)) return null;
+        const val1 = interpolate(age, ageLow, ageHigh, a1, a2);
+        const val2 = interpolate(age, ageLow, ageHigh, b1, b2);
+        return interpolate(height, heightLow, heightHigh, val1, val2);
+      };
+
+      let resultText = '';
+      let matchedPercentile = null;
+
+      for (let i = percentiles.length - 1; i >= 0; i--) {
+        const est = interp(i);
+        if (est == null) continue;
+        if (dist >= est) {
+          matchedPercentile = percentiles[i];
+          break;
+        }
+      }
+
+      if (matchedPercentile === null) {
+        matchedPercentile = "<10";
+      }
+
+      resultText += `Die gemessene Distanz liegt im ${matchedPercentile}. Perzentil. `;
+      resultText += `Die Leistung ist besser als ${matchedPercentile === "<10" ? "weniger als 10" : matchedPercentile}% der Vergleichsgruppe.`;
+
+      if (age > 80) {
+        resultText += `<br><span class="warn">⚠ Achtung: Für Alter >80 liegen keine Normdaten vor. Die Werte basieren auf Extrapolation.</span>`;
+      }
+
+      output.innerHTML = resultText;
     }
-    if (i === interpolated.length - 1) perc = 97.5;
-  }
 
-  let message = `Diese Distanz liegt im ${perc}. Perzentil.\n` +
-                 `Die Leistung ist besser als ${perc}% der Kontrollgruppe.`;
-  if (age > 80) message += "\nAchtung: Keine exakten Normwerte über 80 – Werte basieren auf Interpolation.";
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const dist = document.getElementById("distance").value;
+      const age = document.getElementById("age").value;
+      const height = document.getElementById("height").value;
+      const text = document.getElementById("result").innerText;
 
-  resultDiv.innerText = message;
-}
-</script>
-
+      doc.setFontSize(16);
+      doc.text("6-Minuten-Gehtest – Auswertung", 10, 20);
+      doc.setFontSize(12);
+      doc.text(`Distanz: ${dist} m`, 10, 40);
+      doc.text(`Alter: ${age} Jahre`, 10, 50);
+      doc.text(`Größe: ${height} cm`, 10, 60);
+      doc.text(text, 10, 80, { maxWidth: 180 });
+      doc.save("6MWT_Auswertung.pdf");
+    }
+  </script>
 </body>
 </html>
