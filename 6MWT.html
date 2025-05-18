@@ -91,7 +91,7 @@
     const ages = Object.keys(percentiles[heights[0]]).map(Number);
 
     if (age < 40 || height < 150 || height > 190) {
-      res.innerText = "Nur Werte zwischen 40–80 Jahre und Körpergrößen von 150–190 cm unterstützt.";
+      res.innerText = "Nur Werte zwischen 40–80 Jahren und Körpergrößen von 150–190 cm unterstützt.";
       return;
     }
 
@@ -109,25 +109,33 @@
       return interpolate(height, hLow, hHigh, p0, p1);
     });
 
-    let nearestPercentile = 2.5;
-    let minDiff = Math.abs(dist - interpolated[0]);
+    let rangeLabel = "";
+    let minPercentile = 0;
 
-    for (let i = 1; i < interpolated.length; i++) {
-      const diff = Math.abs(dist - interpolated[i]);
-      if (diff < minDiff) {
-        minDiff = diff;
-        nearestPercentile = percentileLabels[i];
+    for (let i = 0; i < interpolated.length; i++) {
+      if (dist < interpolated[i]) {
+        const pLow = percentileLabels[i - 1] || 0;
+        const pHigh = percentileLabels[i];
+        const vLow = Math.round(interpolated[i - 1] || 0);
+        const vHigh = Math.round(interpolated[i]);
+        rangeLabel = `zwischen dem ${pLow}. und ${pHigh}. Perzentil (Werte: ${vLow} m – ${vHigh} m)`;
+        minPercentile = pLow;
+        break;
       }
     }
 
-    const betterThan = nearestPercentile;
-    const warn = age > 80 ? "⚠️ Achtung: Alter > 80 – extrapolierte Referenzdaten.\n\n" : "";
-    const median = Math.round(interpolated[3]);
+    if (!rangeLabel) {
+      rangeLabel = `über dem 97.5. Perzentil (Wert: ${Math.round(interpolated[6])} m)`;
+      minPercentile = 97.5;
+    }
 
-    res.innerText = 
+    const median = Math.round(interpolated[3]);
+    const warn = age > 80 ? "⚠️ Achtung: Alter > 80 – extrapolierte Referenzdaten.\n\n" : "";
+
+    res.innerText =
       `${warn}Referenzwert (50. Perzentil): ${median} m\n` +
-      `Diese Leistung entspricht ca. dem ${nearestPercentile}. Perzentil (für Alter ${age}, Größe ${height} cm).\n` +
-      `Diese Distanz ist besser als ${betterThan}% der Vergleichsgruppe.`;
+      `Diese Leistung liegt ${rangeLabel}.\n` +
+      `Diese Distanz ist besser als mindestens ${minPercentile}% der Vergleichsgruppe.`;
   }
 </script>
 
