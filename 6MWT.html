@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>6-Minuten-Gehtest Auswertung</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; max-width: 800px; margin: auto; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    select, input[type=number] { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+    #result { margin-top: 30px; font-size: 1.1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>6-Minuten-Gehtest Auswertung</h1>
+
+  <label for="distance">Zurückgelegte Distanz (in m):</label>
+  <input type="number" id="distance" min="0">
+
+  <label for="age">Alter:</label>
+  <input type="number" id="age" min="30" max="110">
+
+  <label for="height">Körpergröße (in cm):</label>
+  <select id="height">
+    <option value="150">140–150 cm</option>
+    <option value="160">151–160 cm</option>
+    <option value="170">161–170 cm</option>
+    <option value="180">171–180 cm</option>
+    <option value="190">181–190 cm</option>
+  </select>
+
+  <button onclick="calculatePercentile()">Normwerte anzeigen</button>
+
+  <div id="result"></div>
+
+<script>
+const table = {
+  "150": {
+    "40": [436, 470, 511, 555, 592, 631, 679],
+    "50": [434, 468, 509, 553, 590, 629, 677],
+    "60": [414, 448, 489, 533, 570, 609, 656],
+    "70": [364, 397, 439, 483, 520, 558, 606],
+    "80": [313, 347, 388, 432, 469, 508, 556]
+  },
+  "160": {
+    "40": [455, 489, 530, 574, 611, 650, 697],
+    "50": [453, 487, 528, 572, 609, 648, 695],
+    "60": [433, 466, 508, 552, 588, 627, 675],
+    "70": [382, 416, 457, 501, 538, 577, 625],
+    "80": [332, 366, 407, 451, 488, 526, 574]
+  },
+  "170": {
+    "40": [474, 507, 549, 593, 629, 668, 716],
+    "50": [472, 505, 546, 590, 627, 666, 714],
+    "60": [451, 485, 526, 570, 607, 646, 694],
+    "70": [401, 435, 476, 520, 557, 595, 643],
+    "80": [351, 384, 425, 469, 506, 545, 593]
+  },
+  "180": {
+    "40": [492, 526, 567, 611, 648, 687, 735],
+    "50": [490, 524, 565, 609, 646, 685, 733],
+    "60": [470, 503, 545, 589, 626, 664, 712],
+    "70": [419, 453, 494, 538, 575, 614, 662],
+    "80": [369, 403, 444, 488, 525, 564, 611]
+  },
+  "190": {
+    "40": [511, 544, 586, 630, 667, 705, 753],
+    "50": [509, 542, 584, 628, 665, 703, 751],
+    "60": [488, 522, 563, 607, 644, 683, 731],
+    "70": [438, 472, 513, 557, 594, 633, 680],
+    "80": [388, 421, 463, 507, 544, 582, 630]
+  }
+};
+
+const percentiles = [2.5, 10, 25, 50, 75, 90, 97.5];
+
+function linearInterpolate(x, x0, x1, y0, y1) {
+  return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+}
+
+function calculatePercentile() {
+  const distance = parseFloat(document.getElementById('distance').value);
+  const age = parseFloat(document.getElementById('age').value);
+  const height = document.getElementById('height').value;
+  const resultDiv = document.getElementById('result');
+
+  if (isNaN(distance) || isNaN(age)) {
+    resultDiv.innerText = "Bitte gültige Werte für Distanz und Alter eingeben.";
+    return;
+  }
+
+  const ageGroups = [40, 50, 60, 70, 80];
+  let ageLow = 40, ageHigh = 80;
+
+  if (age < 40) ageLow = ageHigh = 40;
+  else if (age > 80) {
+    ageLow = 70; ageHigh = 80;
+  } else {
+    for (let i = 0; i < ageGroups.length - 1; i++) {
+      if (age >= ageGroups[i] && age < ageGroups[i + 1]) {
+        ageLow = ageGroups[i];
+        ageHigh = ageGroups[i + 1];
+        break;
+      }
+    }
+  }
+
+  const group = table[height];
+  const interpolated = [];
+
+  for (let i = 0; i < percentiles.length; i++) {
+    const y0 = group[ageLow][i];
+    const y1 = group[ageHigh][i];
+    const value = linearInterpolate(age, ageLow, ageHigh, y0, y1);
+    interpolated.push(value);
+  }
+
+  let perc = 0;
+  for (let i = 0; i < interpolated.length; i++) {
+    if (distance < interpolated[i]) {
+      perc = i === 0 ? 1 : percentiles[i - 1];
+      break;
+    }
+    if (i === interpolated.length - 1) perc = 97.5;
+  }
+
+  let message = `Diese Distanz liegt im ${perc}. Perzentil.\n` +
+                 `Die Leistung ist besser als ${perc}% der Kontrollgruppe.`;
+  if (age > 80) message += "\nAchtung: Keine exakten Normwerte über 80 – Werte basieren auf Interpolation.";
+
+  resultDiv.innerText = message;
+}
+</script>
+
+</body>
+</html>
