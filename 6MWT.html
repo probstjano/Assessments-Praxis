@@ -35,19 +35,23 @@
 
 <h1>6-Minuten-Gehtest – Auswertung</h1>
 
-<label for="distance">Gelaufene Distanz (in Metern):</label>
-<input type="number" id="distance" required>
+<label>Gelaufene Distanz (m):</label><input type="number" id="distance" required>
+<label>Alter (Jahre):</label><input type="number" id="age" required>
+<label>Körpergröße (cm):</label><input type="number" id="height" required>
 
-<label for="age">Alter (in Jahren):</label>
-<input type="number" id="age" required>
+<label>HF vor (bpm):</label><input type="number" id="hf_pre">
+<label>HF nach (bpm):</label><input type="number" id="hf_post">
+<label>SpO₂ vor (%):</label><input type="number" id="spo2_pre">
+<label>SpO₂ nach (%):</label><input type="number" id="spo2_post">
+<label>BORG Anstrengung (0–10):</label><input type="number" id="borg_effort" min="0" max="10">
+<label>BORG Dyspnoe (0–10):</label><input type="number" id="borg_dyspnea" min="0" max="10">
 
-<label for="height">Körpergröße (in cm):</label>
-<input type="number" id="height" required>
-
-<button onclick="calculateNorm()">✅ Normwerte berechnen</button>
+<button onclick="calculateNorm()">📊 Normwerte berechnen</button>
+<button onclick="generatePDF()">📄 PDF erstellen</button>
 
 <div id="result"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   const percentiles = {
     150: { 40: [436,470,511,555,592,631,679], 50: [434,468,509,553,590,629,677], 60: [414,448,489,533,570,609,656], 70: [364,397,439,483,520,558,606], 80: [313,347,388,432,469,508,556] },
@@ -60,20 +64,37 @@
   const percentileLabels = [2.5, 10, 25, 50, 75, 90, 97.5];
 
   function interpolate(x, x0, x1, y0, y1) {
-    if (x0 === x1) return y0;
     return y0 + (y1 - y0) * ((x - x0) / (x1 - x0));
   }
 
-  function getBoundingValues(value, sortedArray) {
-    let lower = sortedArray[0], upper = sortedArray[sortedArray.length - 1];
-    for (let i = 0; i < sortedArray.length - 1; i++) {
-      if (value >= sortedArray[i] && value <= sortedArray[i + 1]) {
-        lower = sortedArray[i];
-        upper = sortedArray[i + 1];
+  function getBoundingValues(value, list) {
+    let lower = list[0], upper = list[list.length - 1];
+    for (let i = 0; i < list.length - 1; i++) {
+      if (value >= list[i] && value <= list[i + 1]) {
+        lower = list[i];
+        upper = list[i + 1];
         break;
       }
     }
     return [lower, upper];
+  }
+
+  function calculateInterpolated(age, height) {
+    const heights = Object.keys(percentiles).map(Number);
+    const ages = Object.keys(percentiles[150]).map(Number);
+    const [h0, h1] = getBoundingValues(height, heights);
+    const [a0, a1] = age <= 80 ? getBoundingValues(age, ages) : [70, 80];
+
+    return percentileLabels.map((_, i) => {
+      const p00 = percentiles[h0][a0][i];
+      const p01 = percentiles[h0][a1][i];
+      const p10 = percentiles[h1][a0][i];
+      const p11 = percentiles[h1][a1][i];
+
+      const p0 = interpolate(age, a0, a1, p00, p01);
+      const p1 = interpolate(age, a0, a1, p10, p11);
+      return interpolate(height, h0, h1, p0, p1);
+    });
   }
 
   function calculateNorm() {
@@ -87,49 +108,56 @@
       return;
     }
 
-    const heights = Object.keys(percentiles).map(Number);
-    const ages = Object.keys(percentiles[heights[0]]).map(Number);
-
     if (age < 40 || height < 150 || height > 190) {
-      res.innerText = "Nur Werte zwischen 40–80 Jahren und Körpergrößen von 150–190 cm unterstützt.";
+      res.innerText = "Nur Werte zwischen 40–80 Jahren und Größen von 150–190 cm unterstützt.";
       return;
     }
 
-    const [hLow, hHigh] = getBoundingValues(height, heights);
-    const [aLow, aHigh] = age <= 80 ? getBoundingValues(age, ages) : [70, 80];
-
-    const interpolated = percentileLabels.map((_, idx) => {
-      const p00 = percentiles[hLow][aLow][idx];
-      const p01 = percentiles[hLow][aHigh][idx];
-      const p10 = percentiles[hHigh][aLow][idx];
-      const p11 = percentiles[hHigh][aHigh][idx];
-
-      const p0 = interpolate(age, aLow, aHigh, p00, p01);
-      const p1 = interpolate(age, aLow, aHigh, p10, p11);
-      return interpolate(height, hLow, hHigh, p0, p1);
-    });
-
-    // Finde das nächstgelegene Perzentil
-    let closestIdx = 0;
-    let minDiff = Math.abs(dist - interpolated[0]);
-    for (let i = 1; i < interpolated.length; i++) {
-      const diff = Math.abs(dist - interpolated[i]);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestIdx = i;
-      }
-    }
+    const interpolated = calculateInterpolated(age, height);
+    const closestIdx = interpolated.reduce((prev, curr, i) => (
+      Math.abs(curr - dist) < Math.abs(interpolated[prev] - dist) ? i : prev
+    ), 0);
 
     const closestP = percentileLabels[closestIdx];
-    const closestVal = Math.round(interpolated[closestIdx]);
-
     const median = Math.round(interpolated[3]);
+    const norm = Math.round(interpolated[closestIdx]);
     const warn = age > 80 ? "⚠️ Achtung: Alter > 80 – extrapolierte Referenzdaten.\n\n" : "";
 
     res.innerText =
       `${warn}Referenzwert (50. Perzentil): ${median} m\n` +
-      `Diese Leistung entspricht etwa dem ${closestP}. Perzentil (≈ ${closestVal} m).\n` +
+      `Diese Leistung entspricht etwa dem ${closestP}. Perzentil (≈ ${norm} m).\n` +
       `Diese Distanz ist besser als ca. ${closestP}% der Vergleichsgruppe.`;
+  }
+
+  async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    let y = 20;
+
+    const inputs = [
+      ['Gelaufene Distanz', 'distance', 'm'],
+      ['Alter', 'age', 'Jahre'],
+      ['Körpergröße', 'height', 'cm'],
+      ['HF vor', 'hf_pre', 'bpm'],
+      ['HF nach', 'hf_post', 'bpm'],
+      ['SpO₂ vor', 'spo2_pre', '%'],
+      ['SpO₂ nach', 'spo2_post', '%'],
+      ['BORG Anstrengung', 'borg_effort', ''],
+      ['BORG Dyspnoe', 'borg_dyspnea', '']
+    ];
+
+    doc.text("6-Minuten-Gehtest – Auswertung", 10, y); y += 10;
+
+    for (const [label, id, unit] of inputs) {
+      const val = document.getElementById(id).value || "-";
+      doc.text(`${label}: ${val} ${unit}`, 10, y);
+      y += 8;
+    }
+
+    const result = document.getElementById("result").innerText;
+    doc.text(result, 10, y + 10);
+    doc.save("6MWT_Auswertung.pdf");
   }
 </script>
 
