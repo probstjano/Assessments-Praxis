@@ -139,9 +139,6 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
   async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-   async function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
 
   // Schrift & Layout
   doc.setFont("helvetica", "normal");
@@ -197,10 +194,6 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
     y += wrapped.length * lineHeight;
   }
 
-  // Optional: Signaturzeile
-  y += 15;
-  doc.line(left, y, 80, y);
-  doc.text("Unterschrift Therapeut:in", left, y + 5);
 
   const today = new Date().toLocaleDateString("de-CH");
   doc.text(`Datum: ${today}`, 150, y + 5);
