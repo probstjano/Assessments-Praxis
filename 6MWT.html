@@ -139,33 +139,75 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
   async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(14);
-    let y = 20;
+   async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    const inputs = [
-      ['Gelaufene Distanz', 'distance', 'm'],
-      ['Alter', 'age', 'Jahre'],
-      ['Körpergröße', 'height', 'cm'],
-      ['HF vor', 'hf_pre', 'bpm'],
-      ['HF nach', 'hf_post', 'bpm'],
-      ['SpO₂ vor', 'spo2_pre', '%'],
-      ['SpO₂ nach', 'spo2_post', '%'],
-      ['BORG Anstrengung', 'borg_effort', ''],
-      ['BORG Dyspnoe', 'borg_dyspnea', '']
-    ];
+  // Schrift & Layout
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
 
-    doc.text("6-Minuten-Gehtest – Auswertung", 10, y); y += 10;
+  let y = 20;
+  const lineHeight = 8;
+  const left = 10;
+  const labelWidth = 60;
 
-    for (const [label, id, unit] of inputs) {
-      const val = document.getElementById(id).value || "-";
-      doc.text(`${label}: ${val} ${unit}`, 10, y);
-      y += 8;
-    }
+  // Titel
+  doc.setFontSize(16);
+  doc.text("6-Minuten-Gehtest – Auswertung", left, y);
+  y += lineHeight;
 
-    const result = document.getElementById("result").innerText;
-    doc.text(result, 10, y + 10);
-    doc.save("6MWT_Auswertung.pdf");
+  doc.setFontSize(12);
+  doc.line(left, y, 200, y); // Trennlinie
+  y += 5;
+
+  // Eingabewerte als Tabelle
+  const inputs = [
+    ['Gelaufene Distanz', 'distance', 'm'],
+    ['Alter', 'age', 'Jahre'],
+    ['Körpergröße', 'height', 'cm'],
+    ['HF vor', 'hf_pre', 'bpm'],
+    ['HF nach', 'hf_post', 'bpm'],
+    ['SpO₂ vor', 'spo2_pre', '%'],
+    ['SpO₂ nach', 'spo2_post', '%'],
+    ['BORG Anstrengung', 'borg_effort', ''],
+    ['BORG Dyspnoe', 'borg_dyspnea', '']
+  ];
+
+  for (const [label, id, unit] of inputs) {
+    const val = document.getElementById(id).value || "-";
+    doc.text(`${label}:`, left, y);
+    doc.text(`${val} ${unit}`, left + labelWidth, y);
+    y += lineHeight;
   }
+
+  y += 5;
+  doc.line(left, y, 200, y); // Trennlinie
+  y += lineHeight;
+
+  // Ergebnistext
+  const result = document.getElementById("result").innerText;
+  if (result) {
+    doc.setFontSize(12);
+    doc.text("Normbewertung:", left, y);
+    y += lineHeight;
+
+    const wrapped = doc.splitTextToSize(result, 180);
+    doc.text(wrapped, left, y);
+    y += wrapped.length * lineHeight;
+  }
+
+  // Optional: Signaturzeile
+  y += 15;
+  doc.line(left, y, 80, y);
+  doc.text("Unterschrift Therapeut:in", left, y + 5);
+
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, 150, y + 5);
+
+  doc.save("6MWT_Formular.pdf");
+}
+
 </script>
 
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
