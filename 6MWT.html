@@ -183,16 +183,29 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
   y += lineHeight;
 
   // Ergebnistext
-  const result = document.getElementById("result").innerText;
-  if (result) {
-    doc.setFontSize(12);
-    doc.text("Normbewertung:", left, y);
-    y += lineHeight;
+const result = document.getElementById("result").innerText;
+if (result) {
+  const lines = result.split("\n").map(line => line.trim()).filter(Boolean);
 
-    const wrapped = doc.splitTextToSize(result, 180);
-    doc.text(wrapped, left, y);
-    y += wrapped.length * lineHeight;
-  }
+  doc.setFontSize(12);
+  doc.text("Normbewertung:", left, y);
+  y += lineHeight;
+
+  lines.forEach((line, index) => {
+    if (line.includes("Referenzwert")) {
+      doc.setFont(undefined, "bold");
+    } else if (line.includes("Diese Leistung")) {
+      doc.setFont(undefined, "normal");
+    } else if (line.includes("besser als")) {
+      doc.setTextColor(100, 100, 100); // grauer Text
+    }
+    doc.text(line, left + 5, y);
+    y += lineHeight;
+    doc.setFont(undefined, "normal");
+    doc.setTextColor(0, 0, 0);
+  });
+}
+
 
 
   const today = new Date().toLocaleDateString("de-CH");
