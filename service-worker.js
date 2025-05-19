@@ -28,6 +28,7 @@ const ASSETS_TO_CACHE = [
   'PSFS_GAS_Kurzmanual.pdf',
   'SPPB_Protokoll.pdf',
   '6MWT_Protokoll.pdf',
+  'MniBEST_Protokoll.pdf',
   'icon.png',
   'manifest.json',
   'Hauptseite.html'
