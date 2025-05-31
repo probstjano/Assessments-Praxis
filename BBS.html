@@ -239,13 +239,21 @@
       }
     }
 
+<<<<<<< HEAD
     
 async function generatePDF() {
+=======
+    async function generatePDF() {
+>>>>>>> b202820e6cac4e64127bdfce423edac1a1596686
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const lineHeight = 8;
   const left = 10;
+<<<<<<< HEAD
   const right = 180;
+=======
+  const labelWidth = 60;
+>>>>>>> b202820e6cac4e64127bdfce423edac1a1596686
   let y = 20;
 
   doc.setFont("helvetica", "normal");
@@ -266,10 +274,18 @@ async function generatePDF() {
     const sel = document.querySelector(`select[name='q${fullIndex}']`);
     if (!sel || sel.value === "") continue;
     const val = parseInt(sel.value);
+<<<<<<< HEAD
     total += val;
     const text = `${fullIndex + 1}. ${q.text}`;
     doc.text(text, left, y);
     doc.text(`${val}`, right, y, { align: "right" });
+=======
+    const label = sel.options[sel.selectedIndex].text;
+    total += val;
+    doc.text(`${fullIndex + 1}. ${q.text}`, left, y);
+    y += lineHeight;
+    doc.text(`Antwort: ${label}`, left + 5, y);
+>>>>>>> b202820e6cac4e64127bdfce423edac1a1596686
     y += lineHeight;
     if (y > 270) {
       doc.addPage();
@@ -287,7 +303,10 @@ async function generatePDF() {
 
   doc.save("BBS_Auswertung.pdf");
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> b202820e6cac4e64127bdfce423edac1a1596686
 
     renderForm();
   </script>
