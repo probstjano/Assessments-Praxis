@@ -53,7 +53,10 @@
   <div id="result"></div>
   <div id="normInfo"></div>
 
-  
+  <div class="nav-buttons">
+    <a href="bereiche.html">⬅️ Zurück zu Bereichs-Assessments</a>
+    <a href="index.html">🏠 Zur Startseite</a>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
@@ -185,14 +188,14 @@
         const block = document.createElement("div");
         block.className = "question-block";
         const options = q.options.map((textOpt, idx) =>
-          <option value="${4 - idx}">${textOpt}</option>).join("");
-        block.innerHTML = 
+          `<option value="${4 - idx}">${textOpt}</option>`).join("");
+        block.innerHTML = `
           <div class="question">${fullIndex + 1}. ${q.text}</div>
           <select name="q${fullIndex}" required>
             <option value="" disabled selected>Antwort auswählen</option>
             ${options}
           </select>
-        ;
+        `;
         container.appendChild(block);
       });
     }
@@ -207,13 +210,13 @@
       let total = 0;
       for (let idx = 0; idx < items.length; idx++) {
         const fullIndex = useShort ? shortIndexes[idx] : idx;
-        const sel = document.querySelector(select[name='q${fullIndex}']);
+        const sel = document.querySelector(`select[name='q${fullIndex}']`);
         if (!sel || sel.value === "") return alert("Bitte alle Fragen beantworten.");
         total += parseInt(sel.value);
       }
       const max = useShort ? 28 : 56;
       currentScore = total;
-      document.getElementById("scoreDisplay").innerText = BBS Gesamtscore: ${total} / ${max};
+      document.getElementById("scoreDisplay").innerText = `BBS Gesamtscore: ${total} / ${max}`;
       if (!useShort) document.getElementById("normBlock").style.display = "block";
     }
 
@@ -223,7 +226,7 @@
         const age = parseInt(document.getElementById("age").value);
         const norm = calculateNorm(age);
         document.getElementById("result").innerText = 
-          Erwarteter Normwert (Alter ${age}): ${norm} Punkte\nCut-off für erhöhtes Sturzrisiko: < 45 Punkte. (BBS aber nicht empfohlen zur alleinigen Beurteilung des Sturzrisikos);
+          `Erwarteter Normwert (Alter ${age}): ${norm} Punkte\nCut-off für erhöhtes Sturzrisiko: < 45 Punkte. (BBS aber nicht empfohlen zur alleinigen Beurteilung des Sturzrisikos)`;
         document.getElementById("normInfo").innerText =
           "Ein 70-jähriger, selbstständig lebender Mensch ohne beeinträchtigende Erkrankungen erreicht wahrscheinlich einen Maximalwert von 56 Punkten auf der BBS. Mit jedem Lebensjahr mehr nimmt der mittlere Wert um ca. 0,7 Punkte pro Jahr ab und die Streuung der Werte steigt deutlich an.";
         normBtn.innerText = "❌ Normwerte verbergen";
@@ -236,43 +239,57 @@
       }
     }
 
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-      const items = useShort ? shortIndexes.map(i => fullQuestions[i]) : fullQuestions;
-      let total = 0;
+    
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const lineHeight = 8;
+  const left = 10;
+  const right = 180;
+  let y = 20;
 
-      doc.setFontSize(16);
-      doc.text(BBS ${useShort ? "Kurzversion" : "Vollversion"} – Auswertung, 10, y);
-      y += 10;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(16);
+  doc.text(`BBS ${useShort ? "Kurzversion" : "Vollversion"} – Auswertung`, left, y);
+  y += lineHeight;
 
-      for (let idx = 0; idx < items.length; idx++) {
-        const fullIndex = useShort ? shortIndexes[idx] : idx;
-        const q = items[idx];
-        const sel = document.querySelector(select[name='q${fullIndex}']);
-        const val = parseInt(sel.value);
-        const label = sel.options[sel.selectedIndex].text;
-        total += val;
-        doc.setFontSize(12);
-        doc.text(${fullIndex + 1}. ${q.text}, 10, y);
-        y += 6;
-        doc.text(Antwort: ${label}, 10, y);
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 10;
-        }
-      }
+  doc.setFontSize(12);
+  doc.line(left, y, 200, y);
+  y += 5;
 
-      const max = useShort ? 28 : 56;
-      doc.setFontSize(14);
-      doc.text(Gesamtscore: ${total} / ${max}, 10, y);
-      window.open(doc.output('bloburl'), '_blank');
+  const items = useShort ? shortIndexes.map(i => fullQuestions[i]) : fullQuestions;
+  let total = 0;
+
+  for (let idx = 0; idx < items.length; idx++) {
+    const fullIndex = useShort ? shortIndexes[idx] : idx;
+    const q = items[idx];
+    const sel = document.querySelector(`select[name='q${fullIndex}']`);
+    if (!sel || sel.value === "") continue;
+    const val = parseInt(sel.value);
+    total += val;
+    const text = `${fullIndex + 1}. ${q.text}`;
+    doc.text(text, left, y);
+    doc.text(`${val}`, right, y, { align: "right" });
+    y += lineHeight;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
+  }
+
+  const max = useShort ? 28 : 56;
+  y += 5;
+  doc.setFontSize(14);
+  doc.text(`Gesamtscore: ${total} / ${max}`, left, y);
+
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, 150, y);
+
+  doc.save("BBS_Auswertung.pdf");
+}
+
 
     renderForm();
   </script>
-<p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
