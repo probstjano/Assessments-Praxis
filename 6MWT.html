@@ -136,9 +136,9 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
       `Diese Distanz ist besser als ca. ${closestP}% der Vergleichsgruppe.`;
   }
 
-  async function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+ async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
   // Schrift & Layout
   doc.setFont("helvetica", "normal");
@@ -182,37 +182,14 @@ Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
   doc.line(left, y, 200, y); // Trennlinie
   y += lineHeight;
 
-  // Ergebnistext
-const result = document.getElementById("result").innerText;
-if (result) {
-  const lines = result.split("\n").map(line => line.trim()).filter(Boolean);
-
-  doc.setFontSize(12);
-  doc.text("Normbewertung:", left, y);
-  y += lineHeight;
-
-  lines.forEach((line, index) => {
-    if (line.includes("Referenzwert")) {
-      doc.setFont(undefined, "bold");
-    } else if (line.includes("Diese Leistung")) {
-      doc.setFont(undefined, "normal");
-    } else if (line.includes("besser als")) {
-      doc.setTextColor(100, 100, 100); // grauer Text
-    }
-    doc.text(line, left + 5, y);
-    y += lineHeight;
-    doc.setFont(undefined, "normal");
-    doc.setTextColor(0, 0, 0);
-  });
-}
-
-
+  // Hinweis: Normwerte wurden absichtlich nicht in die PDF übernommen
 
   const today = new Date().toLocaleDateString("de-CH");
   doc.text(`Datum: ${today}`, 150, y + 5);
 
   doc.save("6MWT_Formular.pdf");
 }
+
 
 </script>
 
