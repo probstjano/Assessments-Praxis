@@ -29,9 +29,14 @@ const ASSETS_TO_CACHE = [
   'SPPB_Protokoll.pdf',
   '6MWT_Protokoll.pdf',
   'MniBEST_Protokoll.pdf',
+  'MiniBEST.html',
   'icon.png',
   'manifest.json',
-  'Hauptseite.html'
+  'index.html',
+  'DGI.html',
+  'DHI.html',
+  'Braincheck.html',
+  
 ];
 
 // Neue Version sofort aktiv
