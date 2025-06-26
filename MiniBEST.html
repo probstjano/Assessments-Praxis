@@ -18,6 +18,7 @@
   <h1>Mini Balance Evaluation Systems Test (Mini-BESTest) </h1>
 <p> Test dynamisches Gleichgewicht </p>
 <P> Im Cenplex Behandlungsplan als <strong> Messung </strong> vorahnden. Hier durchführen und Score übertragen. </P>
+<p> Empfehlung: Vorwiegend der Gesamt-Score vernwenden! Die einzelnen Bereiche für sich alleine sind nicht validiert. </p>
  <p>Detailliertes Durchführungsprotokoll hier:
     <a href="MineBEST_Protokoll.pdf" target="_blank">MiniBEST Protokoll (PDF)</a>
   </p>
@@ -241,19 +242,37 @@ async function generatePDF() {
     
   <div id="result"></div>
   <script>
-    function calculateScore() {
-      let total = 0;
-      for (let i = 1; i <= 14; i++) {
-        const sel = document.querySelector(`select[name='q${i}']`);
-        if (!sel || sel.value === "") {
-          alert("Bitte alle Aufgaben ausfüllen.");
-          return;
-        }
-        total += parseInt(sel.value);
-      }
-      document.getElementById("result").innerText = "Mini-BESTest Gesamtscore: " + total + " / 28";
+function calculateScore() {
+  let total = 0;
+  let antizipatorisch = 0;
+  let reaktiv = 0;
+  let sensorisch = 0;
+  let dynamisch = 0;
+
+  for (let i = 1; i <= 14; i++) {
+    const sel = document.querySelector(`select[name='q${i}']`);
+    if (!sel || sel.value === "") {
+      alert("Bitte alle Aufgaben ausfüllen.");
+      return;
     }
-  </script>
+    const val = parseInt(sel.value);
+    total += val;
+
+    if (i >= 1 && i <= 3) antizipatorisch += val;
+    else if (i >= 4 && i <= 6) reaktiv += val;
+    else if (i >= 7 && i <= 9) sensorisch += val;
+    else if (i >= 10 && i <= 14) dynamisch += val;
+  }
+
+  document.getElementById("result").innerHTML =
+    `<p>Mini-BESTest Gesamtscore: <strong>${total} / 28</strong></p>
+     <p>Antizipatorisch: <strong>${antizipatorisch} / 6</strong></p>
+     <p>Reaktive posturale Kontrolle: <strong>${reaktiv} / 6</strong></p>
+     <p>Sensorische Orientierung: <strong>${sensorisch} / 6</strong></p>
+     <p>Dynamischer Gang: <strong>${dynamisch} / 10</strong></p>`;
+}
+</script>
+
   <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
