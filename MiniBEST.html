@@ -179,7 +179,7 @@ async function generatePDF() {
   let y = 15;
   const lineHeight = 8;
   const left = 15;
-  const right = 190;
+  const right = 180;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(16);
@@ -193,7 +193,7 @@ async function generatePDF() {
   let total = 0;
   let questionNumber = 1;
 
-  let subscores = {
+  const subscores = {
     antizipatorisch: 0,
     reaktiv: 0,
     sensorisch: 0,
@@ -205,8 +205,9 @@ async function generatePDF() {
     if (!sel || sel.value === "") continue;
 
     const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
-    const labelText = rawLabel.replace(/^\d+\.\s*/, "").replace(/\s+/g, " ").trim();
-    const wrappedLines = doc.splitTextToSize(`${questionNumber}. ${labelText}`, 160);
+    const labelText = rawLabel.replace(/^\d+\.\s*/, "").trim();
+    const fullLine = `${questionNumber}. ${labelText}`;
+    const wrappedLines = doc.splitTextToSize(fullLine, 150); // etwas schmaler für sicheren Score-Platz
 
     const val = parseInt(sel.value);
     total += val;
@@ -216,12 +217,16 @@ async function generatePDF() {
     else if (i >= 7 && i <= 9) subscores.sensorisch += val;
     else if (i >= 10 && i <= 14) subscores.dynamisch += val;
 
-   wrappedLines.forEach((line) => {
-  doc.text(line, left, y);
-  y += lineHeight;
-});
-// Punktzahl auf neuer Zeile, rechtsbündig
-doc.text(`${val}`, right, y - lineHeight * wrappedLines.length, { align: "right" });
+    // Drucke Textzeilen
+    wrappedLines.forEach((line, idx) => {
+      doc.text(line, left, y);
+      // Score nur in der ersten Zeile platzieren
+      if (idx === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
+      }
+      y += lineHeight;
+    });
+
     y += 2;
     questionNumber++;
 
@@ -231,29 +236,24 @@ doc.text(`${val}`, right, y - lineHeight * wrappedLines.length, { align: "right"
     }
   }
 
-  // Leerzeile
-  y += 5;
-
   // Subscores
+  y += 5;
   doc.setFontSize(13);
   doc.setFont(undefined, "bold");
   doc.text("Subscores", left, y);
   y += lineHeight;
-
   doc.setFont(undefined, "normal");
   doc.setFontSize(12);
-
-  doc.text(`• Antizipatorisch (Items 1–3): ${subscores.antizipatorisch} / 6`, left, y); y += lineHeight;
-  doc.text(`• Reaktive posturale Kontrolle (Items 4–6): ${subscores.reaktiv} / 6`, left, y); y += lineHeight;
-  doc.text(`• Sensorische Orientierung (Items 7–9): ${subscores.sensorisch} / 6`, left, y); y += lineHeight;
-  doc.text(`• Dynamischer Gang (Items 10–14): ${subscores.dynamisch} / 10`, left, y); y += lineHeight;
+  doc.text(`Antizipatorisch: ${subscores.antizipatorisch} / 6`, left, y); y += lineHeight;
+  doc.text(`Reaktiv-postural: ${subscores.reaktiv} / 6`, left, y); y += lineHeight;
+  doc.text(`Sensorisch: ${subscores.sensorisch} / 6`, left, y); y += lineHeight;
+  doc.text(`Dynamischer Gang: ${subscores.dynamisch} / 10`, left, y); y += lineHeight;
 
   y += 5;
   doc.setFont(undefined, "bold");
   doc.setFontSize(14);
   doc.text("Gesamtergebnis", left, y);
   y += lineHeight;
-
   doc.setFont(undefined, "normal");
   doc.setFontSize(12);
   doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y);
