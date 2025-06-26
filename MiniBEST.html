@@ -216,14 +216,12 @@ async function generatePDF() {
     else if (i >= 7 && i <= 9) subscores.sensorisch += val;
     else if (i >= 10 && i <= 14) subscores.dynamisch += val;
 
-    wrappedLines.forEach((line, idx) => {
-      doc.text(line, left, y);
-      if (idx === 0) {
-        doc.text(`${val}`, right, y, { align: "right" });
-      }
-      y += lineHeight;
-    });
-
+   wrappedLines.forEach((line) => {
+  doc.text(line, left, y);
+  y += lineHeight;
+});
+// Punktzahl auf neuer Zeile, rechtsbündig
+doc.text(`${val}`, right, y - lineHeight * wrappedLines.length, { align: "right" });
     y += 2;
     questionNumber++;
 
