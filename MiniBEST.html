@@ -177,20 +177,28 @@
 </script>
 
 <script>
-  function generatePDF() {
+function replaceUmlauts(text) {
+  return text
+    .replace(/Ä/g, "Ae").replace(/ä/g, "ae")
+    .replace(/Ö/g, "Oe").replace(/ö/g, "oe")
+    .replace(/Ü/g, "Ue").replace(/ü/g, "ue")
+    .replace(/ẞ/g, "SS").replace(/ß/g, "ss");
+}
+
+function generatePDF() {
   const doc = new jsPDF();
+  doc.setFont("times", "normal"); // Times ist UTF-8-freundlicher
+  doc.setFontSize(16);
+
   let y = 15;
   const lineHeight = 8;
   const left = 15;
-  const right = 180;
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(16);
   doc.text("Mini-BESTest – Auswertung", left, y);
   y += lineHeight;
 
   doc.setFontSize(12);
-  doc.line(left, y, right, y);
+  doc.line(left, y, 195, y);
   y += 6;
 
   let total = 0;
@@ -209,28 +217,25 @@
 
     const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
     const labelText = rawLabel.replace(/^\d+\.\s*/, "").trim();
-    const fullLine = `${questionNumber}. ${labelText}`;
-    const wrappedLines = doc.splitTextToSize(fullLine, 150); // etwas schmaler für sicheren Score-Platz
+    const cleanedText = replaceUmlauts(`${questionNumber}. ${labelText}`);
+    const lines = doc.splitTextToSize(cleanedText, 170);
 
     const val = parseInt(sel.value);
     total += val;
 
+    // Subscores zuordnen
     if (i >= 1 && i <= 3) subscores.antizipatorisch += val;
     else if (i >= 4 && i <= 6) subscores.reaktiv += val;
     else if (i >= 7 && i <= 9) subscores.sensorisch += val;
     else if (i >= 10 && i <= 14) subscores.dynamisch += val;
 
-    // Drucke Textzeilen
-    wrappedLines.forEach((line, idx) => {
+    lines.forEach(line => {
       doc.text(line, left, y);
-      // Score nur in der ersten Zeile platzieren
-      if (idx === 0) {
-        doc.text(`${val}`, right, y, { align: "right" });
-      }
       y += lineHeight;
     });
 
-    y += 2;
+    doc.text(`Punkte: ${val}`, 195, y, { align: "right" });
+    y += lineHeight + 2;
     questionNumber++;
 
     if (y > 270) {
@@ -239,10 +244,9 @@
     }
   }
 
-  // Subscores
   y += 5;
-  doc.setFontSize(13);
   doc.setFont(undefined, "bold");
+  doc.setFontSize(13);
   doc.text("Subscores", left, y);
   y += lineHeight;
   doc.setFont(undefined, "normal");
@@ -257,6 +261,7 @@
   doc.setFontSize(14);
   doc.text("Gesamtergebnis", left, y);
   y += lineHeight;
+
   doc.setFont(undefined, "normal");
   doc.setFontSize(12);
   doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y);
