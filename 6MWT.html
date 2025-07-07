@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>6-Minuten-Gehtest – Auswertung</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
+<meta charset="utf-8"/>
+<title>6-Minuten-Gehtest – Auswertung</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<style>
     body {
       font-family: sans-serif;
       padding: 20px;
@@ -30,170 +31,98 @@
       white-space: pre-line;
     }
   </style>
-</head>
+<script src="robotoBase64.js"></script></head>
 <body>
-
 <h1>6-Minuten-Gehtest</h1>
 <p>Test für submaximale aerobe Ausdauer/funktionelle Gehfähigkeit.</p>
 <p>Im Cenplex Behandlungsplan unter <strong> "Messung" </strong> eintragen. Hier eintragen für Normwerte und für Zusatzinfos </p>
 <p> Normwerte veriieren je nach Quelle. Diese Normwerte basieren auf der Studie mit der grössten Stichprobe an <strong> gesunden </strong> Personen und wurden nur für Personen zwschen 30-80Jahre untersucht. 
 Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
 <p> Durchführungsprotokoll hier:
-<a href="6MWT_Protokoll.pdf" target="_blank">SPPB Protokoll (PDF)</a>
-  </p>
-
-<label>Gelaufene Distanz (m):</label><input type="number" id="distance" required>
-<label>Alter (Jahre):</label><input type="number" id="age" required>
-<label>Körpergröße (cm):</label><input type="number" id="height" required>
-
-<label>HF vor (bpm):</label><input type="number" id="hf_pre">
-<label>HF nach (bpm):</label><input type="number" id="hf_post">
-<label>SpO₂ vor (%):</label><input type="number" id="spo2_pre">
-<label>SpO₂ nach (%):</label><input type="number" id="spo2_post">
-<label>BORG Anstrengung (0–10):</label><input type="number" id="borg_effort" min="0" max="10">
-<label>BORG Dyspnoe (0–10):</label><input type="number" id="borg_dyspnea" min="0" max="10">
-
+<a href="6MWT_Protokoll.pdf" target="_blank">6MWT Protokoll (PDF)</a>
+</p>
+<label>Gelaufene Distanz (m):</label><input id="distance" required="" type="number"/>
+<label>Alter (Jahre):</label><input id="age" required="" type="number"/>
+<label>Körpergröße (cm):</label><input id="height" required="" type="number"/>
+<label>HF vor (bpm):</label><input id="hf_pre" type="number"/>
+<label>HF nach (bpm):</label><input id="hf_post" type="number"/>
+<label>SpO₂ vor (%):</label><input id="spo2_pre" type="number"/>
+<label>SpO₂ nach (%):</label><input id="spo2_post" type="number"/>
+<label>BORG Anstrengung (0–10):</label><input id="borg_effort" max="10" min="0" type="number"/>
+<label>BORG Dyspnoe (0–10):</label><input id="borg_dyspnea" max="10" min="0" type="number"/>
 <button onclick="calculateNorm()">📊 Normwerte berechnen</button>
 <button onclick="generatePDF()">📄 PDF erstellen</button>
-
 <div id="result"></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  const percentiles = {
-    150: { 40: [436,470,511,555,592,631,679], 50: [434,468,509,553,590,629,677], 60: [414,448,489,533,570,609,656], 70: [364,397,439,483,520,558,606], 80: [313,347,388,432,469,508,556] },
-    160: { 40: [455,489,530,574,611,650,697], 50: [453,487,528,572,609,648,695], 60: [433,466,508,552,588,627,675], 70: [382,416,457,501,538,577,625], 80: [332,366,407,451,488,526,574] },
-    170: { 40: [474,507,549,593,629,668,716], 50: [472,505,546,590,627,666,714], 60: [451,485,526,570,607,646,694], 70: [401,435,476,520,557,595,643], 80: [351,384,425,469,506,545,593] },
-    180: { 40: [492,526,567,611,648,687,735], 50: [490,524,565,609,646,685,733], 60: [470,503,545,589,626,664,712], 70: [419,453,494,538,575,614,662], 80: [369,403,444,488,525,564,611] },
-    190: { 40: [511,544,586,630,667,705,753], 50: [509,542,584,628,665,703,751], 60: [488,522,563,607,644,683,731], 70: [438,472,513,557,594,633,680], 80: [388,421,463,507,544,582,630] }
-  };
-
-  const percentileLabels = [2.5, 10, 25, 50, 75, 90, 97.5];
-
-  function interpolate(x, x0, x1, y0, y1) {
-    return y0 + (y1 - y0) * ((x - x0) / (x1 - x0));
-  }
-
-  function getBoundingValues(value, list) {
-    let lower = list[0], upper = list[list.length - 1];
-    for (let i = 0; i < list.length - 1; i++) {
-      if (value >= list[i] && value <= list[i + 1]) {
-        lower = list[i];
-        upper = list[i + 1];
-        break;
-      }
-    }
-    return [lower, upper];
-  }
-
-  function calculateInterpolated(age, height) {
-    const heights = Object.keys(percentiles).map(Number);
-    const ages = Object.keys(percentiles[150]).map(Number);
-    const [h0, h1] = getBoundingValues(height, heights);
-    const [a0, a1] = age <= 80 ? getBoundingValues(age, ages) : [70, 80];
-
-    return percentileLabels.map((_, i) => {
-      const p00 = percentiles[h0][a0][i];
-      const p01 = percentiles[h0][a1][i];
-      const p10 = percentiles[h1][a0][i];
-      const p11 = percentiles[h1][a1][i];
-
-      const p0 = interpolate(age, a0, a1, p00, p01);
-      const p1 = interpolate(age, a0, a1, p10, p11);
-      return interpolate(height, h0, h1, p0, p1);
-    });
-  }
-
-  function calculateNorm() {
-    const dist = parseFloat(document.getElementById("distance").value);
-    const age = parseInt(document.getElementById("age").value);
-    const height = parseInt(document.getElementById("height").value);
-    const res = document.getElementById("result");
-
-    if (isNaN(dist) || isNaN(age) || isNaN(height)) {
-      res.innerText = "Bitte alle Felder korrekt ausfüllen.";
-      return;
-    }
-
-    if (age < 40 || height < 150 || height > 190) {
-      res.innerText = "Nur Werte zwischen 40–80 Jahren und Größen von 150–190 cm unterstützt.";
-      return;
-    }
-
-    const interpolated = calculateInterpolated(age, height);
-    const closestIdx = interpolated.reduce((prev, curr, i) => (
-      Math.abs(curr - dist) < Math.abs(interpolated[prev] - dist) ? i : prev
-    ), 0);
-
-    const closestP = percentileLabels[closestIdx];
-    const median = Math.round(interpolated[3]);
-    const norm = Math.round(interpolated[closestIdx]);
-    const warn = age > 80 ? "⚠️ Achtung: Alter > 80 – extrapolierte Referenzdaten.\n\n" : "";
-
-    res.innerText =
-      `${warn}Referenzwert (50. Perzentil): ${median} m\n` +
-      `Diese Leistung entspricht etwa dem ${closestP}. Perzentil (≈ ${norm} m).\n` +
-      `Diese Distanz ist besser als ca. ${closestP}% der Vergleichsgruppe.`;
-  }
-
- async function generatePDF() {
+function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  doc.setFont("Roboto", "normal");
+  doc.setFontSize(14);
 
-  // Schrift & Layout
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(12);
-
-  let y = 20;
+  let y = 15;
+  const left = 15;
+  const right = 190;
   const lineHeight = 8;
-  const left = 10;
-  const labelWidth = 60;
+  let total = 0;
+  let questionNumber = 1;
+  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
 
-  // Titel
-  doc.setFontSize(16);
-  doc.text("6-Minuten-Gehtest – Auswertung", left, y);
-  y += lineHeight;
-
-  doc.setFontSize(12);
-  doc.line(left, y, 200, y); // Trennlinie
-  y += 5;
-
-  // Eingabewerte als Tabelle
-  const inputs = [
-    ['Gelaufene Distanz', 'distance', 'm'],
-    ['Alter', 'age', 'Jahre'],
-    ['Körpergröße', 'height', 'cm'],
-    ['HF vor', 'hf_pre', 'bpm'],
-    ['HF nach', 'hf_post', 'bpm'],
-    ['SpO₂ vor', 'spo2_pre', '%'],
-    ['SpO₂ nach', 'spo2_post', '%'],
-    ['BORG Anstrengung', 'borg_effort', ''],
-    ['BORG Dyspnoe', 'borg_dyspnea', '']
-  ];
-
-  for (const [label, id, unit] of inputs) {
-    const val = document.getElementById(id).value || "-";
-    doc.text(`${label}:`, left, y);
-    doc.text(`${val} ${unit}`, left + labelWidth, y);
-    y += lineHeight;
+  for (let i = 1; i <= 14; i++) {
+    const sel = document.querySelector(`select[name='q${i}']`);
+    if (!sel || sel.value === "") continue;
+    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
+    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
+    const fullLine = `${questionNumber}. ${labelText}`;
+    const wrappedLines = doc.splitTextToSize(fullLine, 160);
+    const val = parseInt(sel.value);
+    total += val;
+    if (i <= 3) subscores.ant += val;
+    else if (i <= 6) subscores.reak += val;
+    else if (i <= 9) subscores.sens += val;
+    else subscores.dyn += val;
+    wrappedLines.forEach((line, idx) => {
+      doc.text(line, left, y);
+      if (idx === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
+      }
+      y += lineHeight;
+    });
+    y += 2;
+    questionNumber++;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
   }
 
   y += 5;
-  doc.line(left, y, 200, y); // Trennlinie
-  y += lineHeight;
+  doc.setFontSize(13);
+  doc.setFont(undefined, "bold");
+  doc.text("Subscores", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
+  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
+  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
+  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
 
-  // Hinweis: Normwerte wurden absichtlich nicht in die PDF übernommen
-
+  y += 5;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Gesamtergebnis", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
   const today = new Date().toLocaleDateString("de-CH");
-  doc.text(`Datum: ${today}`, 150, y + 5);
+  doc.text(`Datum: ${today}`, left, y);
 
-  doc.save("6MWT_Formular.pdf");
+  doc.save("MiniBEST_Auswertung.pdf");
 }
-
-
 </script>
-
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
-
 </body>
 </html>
