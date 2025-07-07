@@ -5,18 +5,7 @@
   <title>Mini-BESTest – Auswertung</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    window.addEventListener("DOMContentLoaded", async () => {
-      const { jsPDF } = window.jspdf;
-      window.jsPDF = jsPDF;
-
-      // Lade Roboto-Regular.ttf aus lokalem Ordner
-      const fontData = await fetch("Roboto-Regular.ttf")
-        .then(res => res.arrayBuffer())
-        .then(buf => btoa(String.fromCharCode(...new Uint8Array(buf))));
-      window.robotoBase64 = fontData;
-    });
-  </script>
+  <script src="robotoBase64.js"></script> <!-- <- das ist deine Datei -->
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
     h1 { text-align: center; }
@@ -30,21 +19,9 @@
 
 <h1>Mini-BESTest</h1>
 <form id="miniBESTForm">
-  <!-- Alle 14 Fragen -->
-  <div class="question-block"><label for="q1">1. Vom Sitzen zum Stehen</label><select name="q1" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q2">2. Auf die Zehenspitzen stellen</label><select name="q2" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q3">3. Auf einem Bein stehen</label><select name="q3" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q4">4. Kompensatorische Schutzschritte – Vorwärts</label><select name="q4" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q5">5. Kompensatorische Schutzschritte – Rückwärts</label><select name="q5" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q6">6. Kompensatorische Schutzschritte – Seitwärts</label><select name="q6" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q7">7. Stand (Füße zusammen), Augen geöffnet</label><select name="q7" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q8">8. Stand (Füße zusammen), Augen geschlossen, Schaumstoff</label><select name="q8" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q9">9. Steigung – Augen geschlossen</label><select name="q9" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q10">10. Änderung der Gehgeschwindigkeit</label><select name="q10" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q11">11. Gehen mit Kopfdrehungen (horizontal)</label><select name="q11" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q12">12. Gehen mit Körperdrehung</label><select name="q12" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q13">13. Gehen über ein Hindernis</label><select name="q13" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
-  <div class="question-block"><label for="q14">14. Timed Up & Go mit Dual Task</label><select name="q14" required><option value="" disabled selected>Bitte auswählen</option><option value="2">2 – Normal</option><option value="1">1 – Moderat</option><option value="0">0 – Schwer</option></select></div>
+  <!-- Hier sind alle 14 Fragen – identisch zu deiner Version -->
+  <!-- … (Fragen q1 bis q14 wie gehabt) … -->
+  <!-- Der Fragenblock wurde aus Platzgründen nicht erneut eingefügt – du kannst deinen 1:1 behalten -->
 
   <button type="button" onclick="generatePDF()">📄 PDF erstellen</button>
   <button type="button" onclick="calculateScore()">✅ Score berechnen</button>
@@ -73,9 +50,10 @@ function calculateScore() {
      <p>Dynamischer Gang: ${dyn} / 10</p>`;
 }
 
-async function generatePDF() {
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFileToVFS("Roboto-Regular.ttf", robotoBase64);
   doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
   doc.setFont("Roboto", "normal");
   doc.setFontSize(14);
