@@ -24,7 +24,6 @@
   <p>Detailliertes Durchführungsprotokoll hier: <a href="MineBEST_Protokoll.pdf" target="_blank">MiniBEST Protokoll (PDF)</a></p>
 
   <form id="miniBESTForm">
-<!-- BEGIN: Vollständige 14 Fragenblöcke eingefügt -->
 <div class="question-block">
   <label for="q1">1. VOM SITZEN ZUM STEHEN</label>
   <p><strong>Anweisung:</strong> „Verschränken Sie die Arme vor Ihrer Brust. Versuchen Sie Ihre Hände nicht einzusetzen, sofern nicht notwendig. Sie sollten den Stuhl nicht mit der Rückseite Ihrer Beine berühren, wenn Sie stehen. Bitte stehen Sie jetzt auf.“</p>
@@ -41,12 +40,130 @@
   <select name="q2" required>
     <option value="" disabled selected>Bitte auswählen</option>
     <option value="2">(2) Normal: Stabil für 3 Sek. bei maximaler Höhe.</option>
-    <option value="1">(1) Moderat: Fersen sind vom Boden abgehoben, aber nicht in vollem Ausmaß ODER deutliche Instabilität während der 3 Sek.</option>
+    <option value="1">(1) Moderat: Fersen sind vom Boden abgehoben, aber nicht in vollem Ausmaß (weniger als zwei zusammengefaltete Hände) ODER deutliche Instabilität während der 3 Sek.</option>
     <option value="0">(0) Schwer: ≤ 3 Sek.</option>
   </select>
 </div>
-<!-- ... Die Fragen q3 bis q14 werden hier in gleicher Struktur ergänzt ... -->
-<!-- END: 14 Fragenblöcke -->
+<div class="question-block">
+  <label for="q3">3. AUF EINEM BEIN STEHEN</label>
+  <p><strong>Anweisung:</strong> „Schauen Sie geradeaus. Behalten Sie Ihre Hände auf den Hüften. Heben Sie Ihr Bein vom Boden nach hinten ab, ohne Ihr Standbein mit Ihrem freien Bein zu berühren oder es aufzustützen. Bleiben Sie so lange wie möglich auf einem Bein stehen. Schauen Sie geradeaus. Heben Sie nun Ihr Bein an.“</p>
+  <select name="q3" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: 20 Sek.</option>
+    <option value="1">(1) Moderat: < 20 Sek.</option>
+    <option value="0">(0) Schwer: Nicht möglich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q4">4. KOMPENSATORISCHE SCHUTZSCHRITTE - VORWÄRTS</label>
+  <p><strong>Anweisung:</strong> „Stellen Sie sich schulterbreit hin, mit den Armen an Ihrer Seite. Lehnen Sie sich nach vorne gegen meine Hände, auch weiter als Sie das ohne meine Unterstützung tun könnten. Wenn ich loslasse, tun Sie was auch immer notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“</p>
+  <select name="q4" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Kompensiert selbstständig mit einem einzelnen, großen Schritt (ein zweiter Schritt zur Anpassung ist erlaubt).</option>
+    <option value="1">(1) Moderat: Mehr als ein Schritt wird benötigt, um das Gleichgewicht wieder herzustellen.</option>
+    <option value="0">(0) Schwer: Kein Schritt ODER würde stürzen, wenn nicht aufgefangen ODER stürzt unwillkürlich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q5">5. KOMPENSATORISCHE SCHUTZSCHRITTE - RÜCKWÄRTS</label>
+  <p><strong>Anweisung:</strong> „Stellen Sie sich schulterbreit hin, mit den Armen an Ihrer Seite. Lehnen Sie sich rückwärts gegen meine Hände, auch weiter als Sie das ohne meine Unterstützung tun könnten. Wenn ich loslasse, tun Sie was auch immer notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“</p>
+  <select name="q5" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Kompensiert selbstständig mit einem einzelnen, großen Schritt</option>
+    <option value="1">(1) Moderat: Mehr als ein Schritt wird benötigt, um das Gleichgewicht wieder herzustellen.</option>
+    <option value="0">(0) Schwer: Kein Schritt ODER würde stürzen, wenn nicht aufgefangen ODER stürzt unwillkürlich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q6">6. KOMPENSATORISCHE SCHUTZSCHRITTE - SEITWÄRTS</label>
+  <p><strong>Anweisung:</strong> „Stellen Sie sich schulterbreit hin, mit den Armen an Ihrer Seite. Lehnen Sie sich zur Seite in meine Hände, auch weiter als Sie das ohne meine Unterstützung tun könnten. Wenn ich loslasse, tun Sie was auch immer notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“</p>
+  <select name="q6" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Kompensiert selbstständig mit einem Schritt (überkreuzt oder seitwärts ist in Ordnung).</option>
+    <option value="1">(1) Moderat: Mehrere Schritte sind notwendig, um das Gleichgewicht wieder herzustellen.</option>
+    <option value="0">(0) Schwer: Stürzt oder Schritt nicht möglich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q7">7. STAND (FÜẞE ZUSAMMEN); AUGEN GEÖFFNET, FESTER UNTERGRUND</label>
+  <p><strong>Anweisung:</strong> „Legen Sie Ihre Hände auf die Hüften. Stellen Sie Ihre Füße zusammen, sodass sie sich beinahe berühren. Schauen Sie geradeaus. Bleiben Sie so stabil und ruhig stehen wie möglich, bis ich Stopp sage.“</p>
+  <select name="q7" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: 30 Sek.</option>
+    <option value="1">(1) Moderat: < 30 Sek.</option>
+    <option value="0">(0) Schwer: Nicht möglich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q8">8. STAND (FÜẞE ZUSAMMEN); AUGEN GESCHLOSSEN, SCHAUMSTOFF-UNTERGRUND</label>
+  <p><strong>Anweisung:</strong> „Stellen Sie sich auf den Schaumstoff Untergrund. Legen Sie Ihre Hände auf die Hüften. Stellen Sie Ihre Füße zusammen, sodass sie sich beinahe berühren. Bleiben Sie so stabil und ruhig stehen wie möglich, bis ich Stopp sage. Ich werde beginnen, die Zeit zu messen, sobald Sie Ihre Augen schließen.“</p>
+  <select name="q8" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: 30 Sek.</option>
+    <option value="1">(1) Moderat: < 30 Sek.</option>
+    <option value="0">(0) Nicht möglich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q9">9. STEIGUNG - AUGEN GESCHLOSSEN</label>
+  <p><strong>Anweisung:</strong> „Bitte stellen Sie sich auf die Rampe mit Steigung mit den Zehenspitzen in Richtung Oberkante der Rampe. Stellen Sie sich schulterbreit hin, mit den Armen an Ihrer Seite. Ich werde beginnen, die Zeit zu messen, sobald Sie Ihre Augen schließen.“</p>
+  <select name="q9" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Steht selbstständig 30 Sek. und passt die Körperhaltung der Schwerkraft an.</option>
+    <option value="1">(1) Moderat: Steht selbstständig <30 Sek. ODER passt die Körperhaltung dem Untergrund an.</option>
+    <option value="0">(0) Schwer: Nicht möglich.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q10">10. ÄNDERUNG DER GEHGESCHWINDIGKEIT</label>
+  <p><strong>Anweisung:</strong> „Beginnen Sie, in Ihrer normalen Geschwindigkeit zu gehen, wenn ich ‚schnell‘ sage, gehen Sie so schnell Sie können. Wenn ich ‚langsam‘ sage, gehen Sie sehr langsam.“</p>
+  <select name="q10" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Ändert deutlich die Gehgeschwindigkeit ohne Anzeichen von Gleichgewichtsbeeinträchtigungen.</option>
+    <option value="1">(1) Moderat: Nicht möglich die Gehgeschwindigkeit zu ändern oder Anzeichen von Gleichgewichtsbeeinträchtigungen.</option>
+    <option value="0">(0) Schwer: Nicht möglich, eine deutliche Änderung der Gehgeschwindigkeit zu erreichen UND Anzeichen von Gleichgewichtsbeeinträchtigungen.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q11">11. GEHEN MIT KOPFDREHUNGEN - HORIZONTAL</label>
+  <p><strong>Anweisung:</strong> „Beginnen Sie, in Ihrer normalen Geschwindigkeit zu gehen, wenn ich ‚rechts‘ sage, drehen Sie Ihren Kopf und schauen nach rechts. Wenn ich ‚links‘ sage, drehen Sie Ihren Kopf und schauen nach links. Versuchen Sie, auf einer gerade Linie zu gehen.“</p>
+  <select name="q11" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Führt Kopfdrehungen ohne Änderung der Gehgeschwindigkeit und hält das Gleichgewicht.</option>
+    <option value="1">(1) Moderat: Führt Kopfdrehungen bei Verringerung der Gehgeschwindigkeit aus.</option>
+    <option value="0">(0) Schwer: Führt Kopfdrehungen mit Gleichgewichtsbeeinträchtigungen aus.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q12">12. GEHEN MIT KÖRPERDREHUNG</label>
+  <p><strong>Anweisung:</strong> „Beginnen Sie, in Ihrer normalen Geschwindigkeit zu gehen. Wenn ich Ihnen sage ‚drehen und Stopp‘, drehen Sie sich, so schnell Sie können, um 180° und halten an. Nach der Drehung sollten Ihre Füße eng zusammen stehen.“</p>
+  <select name="q12" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Dreht sich SCHNELL mit geschlossenen Füßen (≤ 3 Schritte) mit gutem Gleichgewicht.</option>
+    <option value="1">(1) Moderat: Dreht sich LANGSAM mit geschlossenen Füßen (≥ 4 Schritte) mit gutem Gleichgewicht.</option>
+    <option value="0">(0) Schwer: Kann sich bei keiner Geschwindigkeit mit geschlossenen Füßen drehen und zeigt Gleichgewichts-beeinträchtigungen.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q13">13. GEHEN ÜBER EIN HINDERNIS</label>
+  <p><strong>Anweisung:</strong> „Beginnen Sie, in Ihrer normalen Geschwindigkeit zu gehen. Wenn Sie die Kiste erreichen, steigen Sie darüber, nicht daran vorbei und gehen danach weiter.“</p>
+  <select name="q13" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Fähig, über die Kiste zu steigen, bei minimaler Änderung der Gehgeschwindigkeit und mit gutem Gleichgewicht.</option>
+    <option value="1">(1) Moderat: Steigt über die Kiste, aber berührt die Kiste ODER zeigt vorsichtiges Verhalten, indem die Gehgeschwindigkeit verlangsamt wird.</option>
+    <option value="0">(0) Schwer: Nicht möglich, über die Kiste zu steigen ODER geht an der Kiste vorbei.</option>
+  </select>
+</div>
+<div class="question-block">
+  <label for="q14">14. TIMED UP & GO MIT DUAL TASK</label>
+  <p><strong>Anweisung:</strong> „Zählen Sie laut in Dreierschritten von rückwärts. Wenn ich ‚los‘ sage, stehen Sie vom Stuhl auf, gehen in Ihrer normalen Geschwindigkeit über die Markierung auf dem Boden, drehen sich herum, gehen zurück und setzen Sie sich wieder auf den Stuhl. Zählen Sie die gesamte Zeit über rückwärts.“</p>
+  <select name="q14" required>
+    <option value="" disabled selected>Bitte auswählen</option>
+    <option value="2">(2) Normal: Keine erkennbarer Unterschied im Sitzen, Stehen oder Gehen, während des Rückwärtszählens, im Vergleich zum TUG ohne Dual Task.</option>
+    <option value="1">(1) Moderat: Dual Task beeinflusst entweder das Zählen ODER das Gehen (>10%) im Vergleich zum TUG ohne Dual Task.</option>
+    <option value="0">(0) Schwer: Hört während des Gehens auf zu zählen ODER bleibt während des Zählens stehen.</option>
+  </select>
+</div>
 </form>
 
   <button type="button" onclick="calculateScore()">✅ Score berechnen</button>
