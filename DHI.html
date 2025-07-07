@@ -21,7 +21,7 @@
 
 .response-row { display: flex; flex-direction: row; gap: 2rem; }
 </style>
-</head>
+<script src="robotoBase64.js"></script></head>
 <body>
 <h1>Dizziness Handicap Inventory (DHI)</h1>
 <p> Der DHI ist ein Selbstbeurteilungsfragebogen s, der dazu dient, die subjektiv wahrgenommenen Beeinträchtigungen durch Schwindel zu erfassen. Vom Patienten hier ausfüllen lassen und Score als <strong> Messung </strong> im Cenplex Behandlungsplan hinterlegen</p>
@@ -283,112 +283,74 @@
 <div id="result"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  function calculateDHI() {
-    let total = 0, physical = 0, functional = 0, emotional = 0;
-    const mapping = {
-      q0: "P",
-      q1: "E",
-      q2: "F",
-      q3: "P",
-      q4: "F",
-      q5: "F",
-      q6: "F",
-      q7: "P",
-      q8: "E",
-      q9: "E",
-      q10: "P",
-      q11: "F",
-      q12: "P",
-      q13: "F",
-      q14: "E",
-      q15: "F",
-      q16: "P",
-      q17: "E",
-      q18: "F",
-      q19: "E",
-      q20: "E",
-      q21: "E",
-      q22: "E",
-      q23: "F",
-      q24: "P",
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  doc.setFont("Roboto", "normal");
+  doc.setFontSize(14);
 
-    };
-    for (let i = 0; i < 25; i++) {
-      const selected = document.querySelector(`input[name="q${i}"]:checked`);
-      if (!selected) return alert("Bitte alle Fragen beantworten.");
-      const val = parseInt(selected.value);
-      total += val;
-      const domain = mapping[`q${i}`];
-      if (domain === "P") physical += val;
-      if (domain === "F") functional += val;
-      if (domain === "E") emotional += val;
+  let y = 15;
+  const left = 15;
+  const right = 190;
+  const lineHeight = 8;
+  let total = 0;
+  let questionNumber = 1;
+  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
+
+  for (let i = 1; i <= 14; i++) {
+    const sel = document.querySelector(`select[name='q${i}']`);
+    if (!sel || sel.value === "") continue;
+    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
+    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
+    const fullLine = `${questionNumber}. ${labelText}`;
+    const wrappedLines = doc.splitTextToSize(fullLine, 160);
+    const val = parseInt(sel.value);
+    total += val;
+    if (i <= 3) subscores.ant += val;
+    else if (i <= 6) subscores.reak += val;
+    else if (i <= 9) subscores.sens += val;
+    else subscores.dyn += val;
+    wrappedLines.forEach((line, idx) => {
+      doc.text(line, left, y);
+      if (idx === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
+      }
+      y += lineHeight;
+    });
+    y += 2;
+    questionNumber++;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
-    document.getElementById("result").innerText =
-      `Functional Score: ${functional}\nEmotional Score: ${emotional}\nPhysical Score: ${physical}\n\nGesamtscore: ${total} / 100`;
   }
 
-  window.onload = function () {
-    const btn = document.querySelector("button[onclick='generatePDF()']");
-    if (btn) btn.addEventListener("click", generatePDF);
-  };
+  y += 5;
+  doc.setFontSize(13);
+  doc.setFont(undefined, "bold");
+  doc.text("Subscores", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
+  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
+  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
+  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
 
-  function generatePDF() {
-    const doc = new jspdf.jsPDF();
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(16);
-    doc.text("Dizziness Handicap Inventory (DHI)", 10, 15);
-    doc.setFontSize(12);
+  y += 5;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Gesamtergebnis", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, left, y);
 
-    let y = 25, total = 0, physical = 0, functional = 0, emotional = 0;
-    const mapping = {
-      q0: "P",
-      q1: "E",
-      q2: "F",
-      q3: "P",
-      q4: "F",
-      q5: "F",
-      q6: "F",
-      q7: "P",
-      q8: "E",
-      q9: "E",
-      q10: "P",
-      q11: "F",
-      q12: "P",
-      q13: "F",
-      q14: "E",
-      q15: "F",
-      q16: "P",
-      q17: "E",
-      q18: "F",
-      q19: "E",
-      q20: "E",
-      q21: "E",
-      q22: "E",
-      q23: "F",
-      q24: "P",
-
-    };
-    for (let i = 0; i < 25; i++) {
-      const selected = document.querySelector(`input[name="q${i}"]:checked`);
-      const val = selected ? parseInt(selected.value) : 0;
-      total += val;
-      const domain = mapping[`q${i}`];
-      if (domain === "P") physical += val;
-      if (domain === "F") functional += val;
-      if (domain === "E") emotional += val;
-      doc.text(`${i + 1}.`, 10, y);
-      doc.text(`${val} Pkt`, 180, y, { align: "right" });
-      y += 7;
-      if (y > 270) { doc.addPage(); y = 20; }
-    }
-    y += 10;
-    doc.setFontSize(13);
-    doc.text(`Functional Score: ${functional}`, 10, y); y += 7;
-    doc.text(`Emotional Score: ${emotional}`, 10, y); y += 7;
-    doc.text(`Physical Score: ${physical}`, 10, y); y += 7;
-    doc.text(`Gesamtscore: ${total} / 100`, 10, y + 5);
-    doc.save("DHI_Auswertung.pdf");
-  }
+  doc.save("MiniBEST_Auswertung.pdf");
+}
 </script>
+<p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>

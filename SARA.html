@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DEMMI – De Morton Mobility Index</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DEMMI – De Morton Mobility Index</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
     body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
     label { display: block; margin: 10px 0 5px; }
     select {
@@ -29,170 +30,89 @@
     .nav-buttons a:hover { background: #ddd; }
     .hidden { display: none; }
   </style>
-</head>
+<script src="robotoBase64.js"></script></head>
 <body>
-  <h1>SARA – Scale for the Assessment and Rating of Ataxia</h1>
-  <p> semiquantitativen Bewertung der Kleinhirnataxie (spinozerebelläre, Friedreich- und sporadische Ataxxie. Kann auch bei Schlaganfallpatienten mit Ataxie verwendet werden. Höhere Werte = stärkere Ataxie.</p>
-  <p> Im Cenplex Beahndlungsplan als <strong> Messung </strong> hinterlegt . Hier durchführen und Score im Cenplex übertragen </p>
-  <p>Detailliertes Durchführungsprotokoll hier:
+<h1>SARA – Scale for the Assessment and Rating of Ataxia</h1>
+<p> semiquantitativen Bewertung der Kleinhirnataxie (spinozerebelläre, Friedreich- und sporadische Ataxxie. Kann auch bei Schlaganfallpatienten mit Ataxie verwendet werden. Höhere Werte = stärkere Ataxie.</p>
+<p> Im Cenplex Beahndlungsplan als <strong> Messung </strong> hinterlegt . Hier durchführen und Score im Cenplex übertragen </p>
+<p>Detailliertes Durchführungsprotokoll hier:
     <a href="SARA_Protokoll.pdf" target="_blank">SARA Protokoll (PDF)</a>
-  </p>
-  <form id="saraForm">
-    <div id="questions"></div>
-    <button type="button" onclick="calculateSARA()">✅ Score berechnen</button>
-    <button type="button" onclick="generatePDF()">📄 PDF erstellen</button>
-  </form>
- 
-  
-  <div id="result"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const questions = [
-  {
-    text: "1) Gang",
-    options: [
-      "0 – Normal, keine Schwierigkeiten beim Gehen, beim Drehen und bei Tandemgang (bis zu einem Fehltritt erlaubt)",
-      "1 – Leichte Schwierigkeiten, nur sichtbar bei 10 aufeinanderfolgenden Schritten im Tandem",
-      "2 – Deutlich abnormal, mehr als 10 Schritte im Tandem nicht möglich",
-      "3 – Erhebliches Schwanken, Schwierigkeiten bei der Halbumdrehung, aber ohne Unterstützung",
-      "4 – Ausgeprägtes Schwanken, gelegentliches Abstützen an der Wand erforderlich",
-      "5 – Starkes Schwanken, ständige Unterstützung durch Stock oder Arm",
-      "6 – Gehen >10 m nur mit starker Unterstützung (zwei spezielle Stöcke oder Rollator oder Begleitperson)",
-      "7 – Gehen <10 m nur mit starker Unterstützung (zwei spezielle Stöcke oder Rollator oder Begleitperson)",
-      "8 – Gehunfähig, auch mit Unterstützung"
-    ]
-  },
-  {
-    text: "2) Stand",
-    options: [
-      "0 – Normal, kann im Tandem >10 s stehen",
-      "1 – Stehen >10 s mit Füßen zusammen möglich, aber nicht im Tandem",
-      "2 – Stehen >10 s mit Füßen zusammen, aber mit Schwankungen",
-      "3 – Stehen >10 s nur in natürlicher Position",
-      "4 – Kann in natürlicher Position für >10 s stehen, nur mit gelegentlicher Unterstützung",
-      "5 – Kann für >10 s in natürlicher Position nur mit ständiger Unterstützung eines Armes stehen",
-      "6 – Nicht in der Lage für >10 s zu stehen, auch bei konstanter Abstützung eines Armes"
-    ]
-  },
-  {
-    text: "3) Sitzen",
-    options: [
-      "0 – Normal, keine Schwierigkeiten beim Sitzen >10 s",
-      "1 – Leichte Schwierigkeiten, gelegentliches Schwanken",
-      "2 – Ständiges Schwanken, aber >10 s ohne Halten sitzen",
-      "3 – Nur mit gelegentlicher Unterstützung >10 s sitzen",
-      "4 – Ohne kontinuierliche Unterstützung nicht möglich >10 s zu sitzen"
-    ]
-  },
-  {
-    text: "4) Sprechstörungen",
-    options: [
-      "0 – Normal",
-      "1 – Vermutung von Sprechstörungen",
-      "2 – Das Sprechen ist gestört, aber es ist leicht die Person zu verstehen",
-      "3 – Gelegentlich sind Wörter schwer zu verstehen",
-      "4 – Viele Wörter sind schwer zu verstehen",
-      "5 – Nur einzelne Wörter sind verständlich",
-      "6 – Das Sprechen ist unverständlich/Dysarthrie"
-    ]
-  },
-  {
-    text: "5) Finger Chase",
-    options: [
-      "0 – Keine Dysmetrie",
-      "1 – Dysmetrie <5 cm, zu kurz oder über das Ziel hinausschießend",
-      "2 – Dysmetrie <15 cm, zu kurz oder über das Ziel hinausschießend",
-      "3 – Dysmetrie >15 cm, zu kurz oder über das Ziel hinausschießend",
-      "4 – Nicht in der Lage, 5 Bewegungen auszuführen"
-    ]
-  },
-  {
-    text: "6) Finger-Nase-Test",
-    options: [
-      "0 – Kein Tremor",
-      "1 – Tremor mit einer Amplitude von <2 cm",
-      "2 – Tremor mit einer Amplitude von <5 cm",
-      "3 – Tremor mit einer Amplitude von >5 cm",
-      "4 – Nicht in der Lage, 5 Zeigebewegungen auszuführen"
-    ]
-  },
-  {
-    text: "7) Schnelle, alternierende Bewegungen der Hände",
-    options: [
-      "0 – Normal, keine Unregelmäßigkeiten (unter 10 s)",
-      "1 – Geringe Unregelmäßigkeiten (unter 10 s)",
-      "2 – Deutliche Unregelmäßigkeit, Bewegungen schwer unterscheidbar oder unterbrochen, aber unter 10 s",
-      "3 – Sehr große Unregelmäßigkeit, schwer unterscheidbare Bewegungen oder Unterbrechungen, über 10 s",
-      "4 – Nicht in der Lage, 10 Zyklen auszuführen"
-    ]
-  },
-  {
-    text: "8) Knie-Hacke-Versuch",
-    options: [
-      "0 – Normal",
-      "1 – Geringfügig abnormales Gleiten, Kontakt zum Schienbein wird gehalten",
-      "2 – Deutliches abnormales Gleiten, Ferse verliert bis zu 3-mal den Kontakt zum Schienbein während 3 Zyklen",
-      "3 – Stark abnormales Gleiten, Ferse verliert mehr als 3-mal den Kontakt während 3 Zyklen",
-      "4 – Nicht in der Lage, die Aufgabe auszuführen"
-    ]
-  }
-];
+</p>
+<form id="saraForm">
+<div id="questions"></div>
+<button onclick="calculateSARA()" type="button">✅ Score berechnen</button>
+<button onclick="generatePDF()" type="button">📄 PDF erstellen</button>
+</form>
+<div id="result"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  doc.setFont("Roboto", "normal");
+  doc.setFontSize(14);
 
-    const container = document.getElementById("questions");
-    questions.forEach((q, i) => {
-      const block = document.createElement("div");
-      block.className = "question-block";
-      const options = q.options.map((text, idx) => `<option value="${idx}">${text}</option>`).join("");
-      block.innerHTML = `
-        <div class="question">${q.text}</div>
-        <select name="q${i}" required>
-          <option value="" disabled selected>Antwort auswählen</option>
-          ${options}
-        </select>
-      `;
-      container.appendChild(block);
-    });
+  let y = 15;
+  const left = 15;
+  const right = 190;
+  const lineHeight = 8;
+  let total = 0;
+  let questionNumber = 1;
+  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
 
-    function calculateSARA() {
-      let total = 0;
-      for (let i = 0; i < questions.length; i++) {
-        const val = parseInt(document.querySelector(`select[name='q${i}']`)?.value);
-        if (isNaN(val)) return alert("Bitte alle Fragen beantworten.");
-        total += val;
+  for (let i = 1; i <= 14; i++) {
+    const sel = document.querySelector(`select[name='q${i}']`);
+    if (!sel || sel.value === "") continue;
+    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
+    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
+    const fullLine = `${questionNumber}. ${labelText}`;
+    const wrappedLines = doc.splitTextToSize(fullLine, 160);
+    const val = parseInt(sel.value);
+    total += val;
+    if (i <= 3) subscores.ant += val;
+    else if (i <= 6) subscores.reak += val;
+    else if (i <= 9) subscores.sens += val;
+    else subscores.dyn += val;
+    wrappedLines.forEach((line, idx) => {
+      doc.text(line, left, y);
+      if (idx === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
       }
-      document.getElementById("result").innerText = `SARA Gesamtscore: ${total} / 40\n(Höhere Werte = stärkere Ataxie)`;
+      y += lineHeight;
+    });
+    y += 2;
+    questionNumber++;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
+  }
 
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      let doc = new jsPDF();
-      let y = 10;
+  y += 5;
+  doc.setFontSize(13);
+  doc.setFont(undefined, "bold");
+  doc.text("Subscores", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
+  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
+  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
+  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
 
-      doc.setFontSize(16);
-      doc.text("SARA – Auswertung", 10, y);
-      y += 10;
+  y += 5;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Gesamtergebnis", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, left, y);
 
-      let total = 0;
-      questions.forEach((q, i) => {
-        const select = document.querySelector(`select[name='q${i}']`);
-        const val = parseInt(select?.value);
-        const label = select?.options[select.selectedIndex]?.text;
-        if (!isNaN(val)) total += val;
-        doc.setFontSize(12);
-        doc.text(`${q.text}`, 10, y);
-        y += 6;
-        doc.text(`Antwort: ${label}`, 10, y);
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 10;
-        }
-      });
-
-      doc.setFontSize(14);
-      doc.text(`Gesamtscore: ${total} / 40 (höhere Werte = stärkere Symptomatik)`, 10, y);
-      window.open(doc.output('bloburl'), '_blank');
-    }
-  </script>
+  doc.save("MiniBEST_Auswertung.pdf");
+}
+</script>
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p></body>
 </html>

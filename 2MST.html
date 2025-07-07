@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>2-Minuten Step Test</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2-Minuten Step Test</title>
+<style>
     body { font-family: sans-serif; margin: 2rem; font-size: 16px; max-width: 700px; }
     label { display: block; margin-top: 1rem; }
     input, select { width: 100%; padding: 6px; font-size: 16px; margin-bottom: 10px; }
@@ -22,155 +23,108 @@
     }
     .nav-buttons a:hover { background: #ddd; }
   </style>
-</head>
+<script src="robotoBase64.js"></script></head>
 <body>
-  <h1>2-Minuten Step Test</h1>
-  <p>Test zur Beurteilung der kardiovaskulären Ausdauerleistungsfähigkeit.</p>
-  <p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> hinterlegt. Hier eintragen für Normwerte.</p>
-  <p>Detailliertes Protokoll hier:
+<h1>2-Minuten Step Test</h1>
+<p>Test zur Beurteilung der kardiovaskulären Ausdauerleistungsfähigkeit.</p>
+<p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> hinterlegt. Hier eintragen für Normwerte.</p>
+<p>Detailliertes Protokoll hier:
     <a href="2MST.pdf" target="_blank">2MST Protokoll (PDF)</a></p>
-
-  <form>
-    <label>Anzahl Schritte in 2 Minuten:</label>
-    <input type="number" id="steps" min="0" step="1">
-    <label>Alter:</label>
-    <input type="number" id="age" min="60" max="100">
-    <label>Geschlecht:</label>
-    <select id="sex">
-      <option value="men">Männlich</option>
-      <option value="women">Weiblich</option>
-    </select>
-    <label>HF vor (bpm):</label>
-    <input type="number" id="hf_pre">
-    <label>HF nach (bpm):</label>
-    <input type="number" id="hf_post">
-    <label>SpO₂ vor (%):</label>
-    <input type="number" id="spo2_pre">
-    <label>SpO₂ nach (%):</label>
-    <input type="number" id="spo2_post">
-    <label>BORG Anstrengung (0–10):</label>
-    <input type="number" id="borg_effort" min="0" max="10">
-    <button type="button" onclick="calculateNorm()">✅ Normwerte anzeigen</button>
-    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
-  </form>
-
-  <div id="result"></div>
-  <div id="normwerte" class="hidden"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<form>
+<label>Anzahl Schritte in 2 Minuten:</label>
+<input id="steps" min="0" step="1" type="number"/>
+<label>Alter:</label>
+<input id="age" max="100" min="60" type="number"/>
+<label>Geschlecht:</label>
+<select id="sex">
+<option value="men">Männlich</option>
+<option value="women">Weiblich</option>
+</select>
+<label>HF vor (bpm):</label>
+<input id="hf_pre" type="number"/>
+<label>HF nach (bpm):</label>
+<input id="hf_post" type="number"/>
+<label>SpO₂ vor (%):</label>
+<input id="spo2_pre" type="number"/>
+<label>SpO₂ nach (%):</label>
+<input id="spo2_post" type="number"/>
+<label>BORG Anstrengung (0–10):</label>
+<input id="borg_effort" max="10" min="0" type="number"/>
+<button onclick="calculateNorm()" type="button">✅ Normwerte anzeigen</button>
+<button onclick="generatePDF()" type="button">📄 Als PDF speichern</button>
+</form>
+<div id="result"></div>
+<div class="hidden" id="normwerte"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  const normData = {
-    men: {
-      "60-64": [74, 87, 101, 115, 128],
-      "65-69": [72, 86, 101, 116, 130],
-      "70-74": [66, 80, 95, 110, 125],
-      "75-79": [56, 73, 91, 109, 125],
-      "80-84": [56, 71, 87, 103, 118],
-      "85-89": [44, 59, 75, 91, 106],
-      "90-94": [36, 52, 69, 86, 102]
-    },
-    women: {
-      "60-64": [60, 75, 91, 107, 122],
-      "65-69": [57, 73, 90, 107, 123],
-      "70-74": [53, 68, 84, 101, 116],
-      "75-79": [52, 68, 84, 100, 115],
-      "80-84": [46, 60, 75, 91, 104],
-      "85-89": [42, 55, 70, 85, 98],
-      "90-94": [31, 44, 58, 72, 85]
-    }
-  };
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  doc.setFont("Roboto", "normal");
+  doc.setFontSize(14);
 
-  function getAgeGroup(age) {
-    const groups = ["60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90-94"];
-    for (let g of groups) {
-      const [min, max] = g.split("-").map(Number);
-      if (age >= min && age <= max) return g;
-    }
-    return "90-94";
-  }
+  let y = 15;
+  const left = 15;
+  const right = 190;
+  const lineHeight = 8;
+  let total = 0;
+  let questionNumber = 1;
+  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
 
-  function calculateNorm() {
-    const steps = parseInt(document.getElementById("steps").value);
-    const age = parseInt(document.getElementById("age").value);
-    const sex = document.getElementById("sex").value;
-    const resultDiv = document.getElementById("result");
-    const normDiv = document.getElementById("normwerte");
-
-    if (isNaN(steps) || isNaN(age)) {
-      resultDiv.innerText = "Bitte Schritte und Alter korrekt eingeben.";
-      return;
-    }
-
-    const ageGroup = getAgeGroup(age);
-    const norms = normData[sex][ageGroup];
-    const percentiles = [10, 25, 50, 75, 90];
-    let percentile = "-";
-
-    for (let i = 0; i < norms.length; i++) {
-      if (steps <= norms[i]) {
-        percentile = percentiles[i];
-        break;
+  for (let i = 1; i <= 14; i++) {
+    const sel = document.querySelector(`select[name='q${i}']`);
+    if (!sel || sel.value === "") continue;
+    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
+    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
+    const fullLine = `${questionNumber}. ${labelText}`;
+    const wrappedLines = doc.splitTextToSize(fullLine, 160);
+    const val = parseInt(sel.value);
+    total += val;
+    if (i <= 3) subscores.ant += val;
+    else if (i <= 6) subscores.reak += val;
+    else if (i <= 9) subscores.sens += val;
+    else subscores.dyn += val;
+    wrappedLines.forEach((line, idx) => {
+      doc.text(line, left, y);
+      if (idx === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
       }
-    }
-    if (steps > norms[norms.length - 1]) percentile = ">90";
-
-    normDiv.innerHTML =
-      `<h3>US-Amerikansiche Normwerte 1999 (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'})</h3>
-      <table><tr><th>Perzentil</th><th>Schritte</th></tr>
-      ${percentiles.map((p, i) => `<tr><td>P${p}</td><td>${norms[i]}</td></tr>`).join("")}
-      </table>`;
-
-    resultDiv.innerHTML =
-      `Anzahl Schritte: ${steps}<br>→ Dieser Wert ist besser als ca. <strong>${percentile}</strong>% der Vergleichsgruppe (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'}).`;
-    normDiv.classList.remove("hidden");
-  }
-
-  async function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    let y = 20;
-    const lineHeight = 8;
-    const left = 10;
-    const labelWidth = 60;
-
-    doc.setFontSize(16);
-    doc.text("2-Minuten Step Test – Auswertung", left, y);
-    y += lineHeight;
-
-    doc.setFontSize(12);
-    doc.line(left, y, 200, y); y += 5;
-
-    const inputs = [
-      ['Anzahl Schritte', 'steps', ''],
-      ['Alter', 'age', 'Jahre'],
-      ['Geschlecht', 'sex', ''],
-      ['HF vor', 'hf_pre', 'bpm'],
-      ['HF nach', 'hf_post', 'bpm'],
-      ['SpO₂ vor', 'spo2_pre', '%'],
-      ['SpO₂ nach', 'spo2_post', '%'],
-      ['BORG Anstrengung', 'borg_effort', '']
-    ];
-
-    for (const [label, id, unit] of inputs) {
-      let val = document.getElementById(id).value || "-";
-      if (id === "sex") val = val === "men" ? "Männlich" : "Weiblich";
-      doc.text(`${label}:`, left, y);
-      doc.text(`${val} ${unit}`, left + labelWidth, y);
       y += lineHeight;
+    });
+    y += 2;
+    questionNumber++;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
-
-    y += 5;
-    doc.line(left, y, 200, y);
-    y += lineHeight;
-
-    const today = new Date().toLocaleDateString("de-CH");
-    doc.text(`Datum: ${today}`, 150, y + 5);
-    doc.save("2MST_Formular.pdf");
   }
-</script>
 
-  <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
+  y += 5;
+  doc.setFontSize(13);
+  doc.setFont(undefined, "bold");
+  doc.text("Subscores", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
+  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
+  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
+  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
+
+  y += 5;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Gesamtergebnis", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, left, y);
+
+  doc.save("MiniBEST_Auswertung.pdf");
+}
+</script>
+<p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
