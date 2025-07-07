@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>1-Minute Sit-to-Stand Test (1MSTS)</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-Minute Sit-to-Stand Test (1MSTS)</title>
+  <style>
     body { font-family: sans-serif; margin: 2rem; font-size: 16px; max-width: 600px; }
     label { display: block; margin-top: 1rem; }
     input, select { width: 100%; padding: 6px; font-size: 16px; margin-bottom: 10px; }
@@ -16,96 +15,160 @@
     th { background: #f0f0f0; }
     .hidden { display: none; }
   </style>
-<script src="robotoBase64.js"></script></head>
+</head>
 <body>
-<h1>1-Minute Sit-to-Stand Test (1MSTS)</h1>
-<p>Test zur Erfassung der Kardiovaskulären und Muskulären Ausdauer. In der Innereren Medizin, speziell Pulmonale Rehabilitation, sehr gut validiert. </p>
-<p>Durchführung: Wenn möglich Stuhl ca 46cm hoch. So oft wie möglich innerhalb 1min aufstehen-absitzen ohne Arme zur Hilfe zu nehmen. Arme auf der Hüfte oder frei neben dem Körper. Nach 30s und 45s die Zeit durchgeben </p>
-<p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> dokumentieren. Hier eintragen für Normwerte </p>
-<form>
-<label>Wiederholungen in 1 Minute:</label>
-<input id="reps" step="1" type="number"/>
-<label>Alter:</label>
-<input id="age" max="100" min="18" type="number"/>
-<label>Geschlecht:</label>
-<select id="sex">
-<option value="men">Männlich</option>
-<option value="women">Weiblich</option>
-</select>
-<button id="toggleBtn1MSTS" onclick="toggleNorms1MSTS()" type="button">📊 Normwerte anzeigen</button>
-<button onclick="generatePDF()" type="button">📄 Als PDF speichern</button>
-</form>
-<div class="hidden" id="normwerte1MSTS"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
-  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
-  doc.setFont("Roboto", "normal");
-  doc.setFontSize(14);
+  <h1>1-Minute Sit-to-Stand Test (1MSTS)</h1>
+  <p>Test zur Erfassung der Kardiovaskulären und Muskulären Ausdauer. In der Innereren Medizin, speziell Pulmonale Rehabilitation, sehr gut validiert. </p>
+  <p>Durchführung: Wenn möglich Stuhl ca 46cm hoch. So oft wie möglich innerhalb 1min aufstehen-absitzen ohne Arme zur Hilfe zu nehmen. Arme auf der Hüfte oder frei neben dem Körper. Nach 30s und 45s die Zeit durchgeben </p>
+  <p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> dokumentieren. Hier eintragen für Normwerte </p>
+  <form>
+    <label>Wiederholungen in 1 Minute:</label>
+    <input type="number" id="reps" step="1" />
 
-  let y = 15;
-  const left = 15;
-  const right = 190;
-  const lineHeight = 8;
-  let total = 0;
-  let questionNumber = 1;
-  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
+    <label>Alter:</label>
+    <input type="number" id="age" min="18" max="100" />
 
-  for (let i = 1; i <= 14; i++) {
-    const sel = document.querySelector(`select[name='q${i}']`);
-    if (!sel || sel.value === "") continue;
-    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
-    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
-    const fullLine = `${questionNumber}. ${labelText}`;
-    const wrappedLines = doc.splitTextToSize(fullLine, 160);
-    const val = parseInt(sel.value);
-    total += val;
-    if (i <= 3) subscores.ant += val;
-    else if (i <= 6) subscores.reak += val;
-    else if (i <= 9) subscores.sens += val;
-    else subscores.dyn += val;
-    wrappedLines.forEach((line, idx) => {
-      doc.text(line, left, y);
-      if (idx === 0) {
-        doc.text(`${val}`, right, y, { align: "right" });
+    <label>Geschlecht:</label>
+    <select id="sex">
+      <option value="men">Männlich</option>
+      <option value="women">Weiblich</option>
+    </select>
+
+    <button type="button" onclick="toggleNorms1MSTS()" id="toggleBtn1MSTS">📊 Normwerte anzeigen</button>
+    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
+  </form>
+
+  <div id="normwerte1MSTS" class="hidden"></div>
+
+  
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let normVisible = false;
+
+    const normsCH = {
+      men: {
+        20: [27, 41, 50, 57, 72],
+        25: [29, 40, 48, 56, 74],
+        30: [28, 40, 47, 56, 72],
+        35: [27, 38, 47, 58, 72],
+        40: [25, 37, 45, 53, 69],
+        45: [25, 35, 44, 52, 70],
+        50: [24, 35, 42, 53, 67],
+        55: [22, 33, 41, 48, 63],
+        60: [20, 31, 37, 46, 63],
+        65: [20, 29, 35, 44, 60],
+        70: [19, 27, 32, 40, 59],
+        75: [16, 25, 30, 37, 56]
+      },
+      women: {
+        20: [31, 39, 47, 55, 70],
+        25: [30, 40, 47, 54, 68],
+        30: [27, 37, 45, 51, 68],
+        35: [25, 37, 42, 50, 63],
+        40: [26, 35, 41, 48, 65],
+        45: [25, 35, 41, 50, 63],
+        50: [23, 33, 39, 47, 60],
+        55: [21, 30, 36, 43, 61],
+        60: [20, 28, 34, 40, 55],
+        65: [19, 27, 33, 40, 53],
+        70: [17, 25, 30, 36, 51],
+        75: [13, 22, 27, 30, 43]
       }
-      y += lineHeight;
-    });
-    y += 2;
-    questionNumber++;
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
+    };
+
+    function getNearestAgeGroup(age) {
+      const ageGroups = [20,25,30,35,40,45,50,55,60,65,70,75];
+      return ageGroups.reduce((a, b) =>
+        Math.abs(b - age) < Math.abs(a - age) ? b : a
+      );
     }
-  }
 
-  y += 5;
-  doc.setFontSize(13);
-  doc.setFont(undefined, "bold");
-  doc.text("Subscores", left, y); y += lineHeight;
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(12);
-  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
-  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
-  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
-  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
+    function toggleNorms1MSTS() {
+      const btn = document.getElementById("toggleBtn1MSTS");
+      const div = document.getElementById("normwerte1MSTS");
 
-  y += 5;
-  doc.setFont(undefined, "bold");
-  doc.setFontSize(14);
-  doc.text("Gesamtergebnis", left, y); y += lineHeight;
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(12);
-  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
-  const today = new Date().toLocaleDateString("de-CH");
-  doc.text(`Datum: ${today}`, left, y);
+      if (normVisible) {
+        div.classList.add("hidden");
+        btn.innerText = "📊 Normwerte anzeigen";
+        normVisible = false;
+        return;
+      }
 
-  doc.save("MiniBEST_Auswertung.pdf");
-}
-</script>
+      const reps = parseInt(document.getElementById("reps").value);
+      const age = parseInt(document.getElementById("age").value);
+      const sex = document.getElementById("sex").value;
+
+      div.innerHTML = "";
+
+      if (isNaN(reps) || isNaN(age)) {
+        div.innerText = "Bitte gültige Werte eingeben.";
+        div.classList.remove("hidden");
+        return;
+      }
+
+      let ageGroup = getNearestAgeGroup(age);
+      if (age > 79) ageGroup = 75;
+
+      const P = normsCH[sex][ageGroup];
+      const percentiles = [2.5, 25, 50, 75, 97.5];
+      let faster = "-";
+
+      if (!P) {
+        div.innerText = "Keine Normdaten vorhanden.";
+        div.classList.remove("hidden");
+        return;
+      }
+
+      if (reps <= P[0]) faster = 2;
+      else if (reps >= P[4]) faster = 98;
+      else {
+        for (let i = 0; i < P.length - 1; i++) {
+          if (reps >= P[i] && reps <= P[i + 1]) {
+            const p0 = percentiles[i], p1 = percentiles[i + 1];
+            const v0 = P[i], v1 = P[i + 1];
+            const frac = (reps - v0) / (v1 - v0);
+            faster = Math.round(p0 + frac * (p1 - p0));
+            break;
+          }
+        }
+      }
+
+      if (age > 79) {
+        div.innerHTML += `<p><em>Keine Normwerte verfügbar für dieses Alter. Angezeigt sind Werte für 75–79 Jahre.</em></p>`;
+      }
+
+      div.innerHTML += `
+        <h3>Schweizer Normwerte Allgemeinbevölkerung (${ageGroup} J. – ${sex === "men" ? "Männer" : "Frauen"})</h3>
+        <table><tr><th>Perzentil</th><th>Wiederholungen</th></tr>
+        ${percentiles.map((p, i) => `<tr><td>P${p}</td><td>${P[i]}</td></tr>`).join("")}
+        </table>
+        <p>→ Diese Wiederholungszahl liegt über dem Wert von <strong>${faster}%</strong> der Vergleichsgruppe.</p>
+      `;
+
+      div.classList.remove("hidden");
+      btn.innerText = "📉 Normwerte verbergen";
+      normVisible = true;
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("1-Minute Sit-to-Stand Test", 10, 15);
+      doc.setFontSize(12);
+
+      const reps = document.getElementById("reps").value;
+      const age = document.getElementById("age").value;
+      const sex = document.getElementById("sex").value;
+      doc.text(`Wiederholungen: ${reps}`, 10, 30);
+      doc.text(`Alter: ${age}`, 10, 38);
+      doc.text(`Geschlecht: ${sex === "men" ? "Männlich" : "Weiblich"}`, 10, 46);
+
+      doc.text("Normdaten siehe Webtool.", 10, 60);
+      window.open(doc.output("bloburl"), "_blank");
+    }
+  </script>
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
