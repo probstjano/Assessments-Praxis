@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -58,42 +59,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="robotoBase64.js"></script>
-  
-  </style>
-</head>
-<body>
-  <h1>2-Minuten Step Test</h1>
-  <p>Test zur Beurteilung der kardiovaskulären Ausdauerleistungsfähigkeit.</p>
-  <p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> hinterlegt. Hier eintragen für Normwerte.</p>
-  <p>Detailliertes Protokoll hier:
-    <a href="2MST.pdf" target="_blank">2MST Protokoll (PDF)</a></p>
-
- <form>
-    <label>Anzahl Schritte in 2 Minuten:</label>
-    <input type="number" id="steps" min="0" step="1">
-    <label>Alter:</label>
-    <input type="number" id="age" min="60" max="100">
-    <label>Geschlecht:</label>
-    <select id="sex">
-      <option value="men">Männlich</option>
-      <option value="women">Weiblich</option>
-    </select>
-    <label>HF vor (bpm):</label>
-    <input type="number" id="hf_pre">
-    <label>HF nach (bpm):</label>
-    <input type="number" id="hf_post">
-    <label>SpO₂ vor (%):</label>
-    <input type="number" id="spo2_pre">
-    <label>SpO₂ nach (%):</label>
-    <input type="number" id="spo2_post">
-    <label>BORG Anstrengung (0–10):</label>
-    <input type="number" id="borg_effort" min="0" max="10">
-    <button type="button" onclick="calculateNorm()">✅ Normwerte anzeigen</button>
-    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
-  </form>
-
-  <div id="result"></div>
-  <div id="normwerte" class="hidden"></div>
 <script>
   const normData = {
     men: {
@@ -116,60 +81,52 @@
     }
   };
 
-function getAgeGroup(age) {
-  const groups = ["60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90-94"];
-  for (let g of groups) {
-    const [min, max] = g.split("-").map(Number);
-    if (age >= min && age <= max) return g;
-  }
-  return null; // 👈 Alter liegt außerhalb der Gruppen
-}
-
-function calculateNorm() {
-  const steps = parseInt(document.getElementById("steps").value);
-  const age = parseInt(document.getElementById("age").value);
-  const sex = document.getElementById("sex").value;
-  const resultDiv = document.getElementById("result");
-  const normDiv = document.getElementById("normwerte");
-
-  if (isNaN(steps) || isNaN(age)) {
-    resultDiv.innerText = "Bitte Schritte und Alter korrekt eingeben.";
-    return;
-  }
-
-  const ageGroup = getAgeGroup(age);
-
-  if (!ageGroup) {
-    resultDiv.innerHTML = `Anzahl Schritte: ${steps}<br>⚠️ Für Alter unter 60 oder über 94 sind keine Normdaten verfügbar.`;
-    normDiv.classList.add("hidden");
-    return;
-  }
-
-  const norms = normData[sex][ageGroup];
-  const percentiles = [10, 25, 50, 75, 90];
-  let percentile = "-";
-
-  for (let i = 0; i < norms.length; i++) {
-    if (steps <= norms[i]) {
-      percentile = percentiles[i];
-      break;
+  function getAgeGroup(age) {
+    const groups = ["60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90-94"];
+    for (let g of groups) {
+      const [min, max] = g.split("-").map(Number);
+      if (age >= min && age <= max) return g;
     }
+    return "90-94";
   }
-  if (steps > norms[norms.length - 1]) percentile = ">90";
 
-  normDiv.innerHTML =
-    `<h3>US-Amerikanische Normwerte 1999 (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'})</h3>
-    <table><tr><th>Perzentil</th><th>Schritte</th></tr>
-    ${percentiles.map((p, i) => `<tr><td>P${p}</td><td>${norms[i]}</td></tr>`).join("")}
-    </table>`;
+  function calculateNorm() {
+    const steps = parseInt(document.getElementById("steps").value);
+    const age = parseInt(document.getElementById("age").value);
+    const sex = document.getElementById("sex").value;
+    const resultDiv = document.getElementById("result");
+    const normDiv = document.getElementById("normwerte");
 
-  resultDiv.innerHTML =
-    `Anzahl Schritte: ${steps}<br>→ Dieser Wert ist besser als ca. <strong>${percentile}</strong>% der Vergleichsgruppe (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'}).`;
+    if (isNaN(steps) || isNaN(age)) {
+      resultDiv.innerText = "Bitte Schritte und Alter korrekt eingeben.";
+      return;
+    }
 
-  normDiv.classList.remove("hidden");
-}
-<script>
-  async function generatePDF() {
+    const ageGroup = getAgeGroup(age);
+    const norms = normData[sex][ageGroup];
+    const percentiles = [10, 25, 50, 75, 90];
+    let percentile = "-";
+
+    for (let i = 0; i < norms.length; i++) {
+      if (steps <= norms[i]) {
+        percentile = percentiles[i];
+        break;
+      }
+    }
+    if (steps > norms[norms.length - 1]) percentile = ">90";
+
+    normDiv.innerHTML =
+      <h3>US-Amerikansiche Normwerte 1999 (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'})</h3>
+      <table><tr><th>Perzentil</th><th>Schritte</th></tr>
+      ${percentiles.map((p, i) => <tr><td>P${p}</td><td>${norms[i]}</td></tr>).join("")}
+      </table>;
+
+    resultDiv.innerHTML =
+      Anzahl Schritte: ${steps}<br>→ Dieser Wert ist besser als ca. <strong>${percentile}</strong>% der Vergleichsgruppe (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'}).;
+    normDiv.classList.remove("hidden");
+  }
+
+   async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -221,4 +178,4 @@ function calculateNorm() {
 
   <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
-</html>
+</html> .... passe mir hier einfach die generate pdf an wie bei den anderen mit robot
