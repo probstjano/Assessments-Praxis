@@ -11,40 +11,83 @@
       font-size: 16px;
       max-width: 600px;
     }
-    label { display: block; margin-top: 1rem; }
-    input, select {
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    input[type="number"],
+    select {
       width: 100%;
       padding: 6px;
       font-size: 16px;
       margin-bottom: 10px;
     }
+
     button {
       margin-top: 10px;
       padding: 10px 15px;
       font-size: 16px;
     }
-    #result, #normwerteSitz, #normwerteSPPB, #normwerteGait {
+
+    #result,
+    #normwerteSitz,
+    #normwerteSPPB,
+    #normwerteGait {
       font-weight: bold;
       margin-top: 20px;
       white-space: pre-line;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid #ccc;
       padding: 6px;
       text-align: center;
     }
+
     th {
       background: #f0f0f0;
     }
-    .hidden { display: none; }
+
+    .hidden {
+      display: none;
+    }
+
+    .checkbox-group,
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .checkbox-group label,
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .checkbox-group input[type="checkbox"],
+    .radio-group input[type="radio"] {
+      transform: scale(1.2);
+      margin: 0;
+    }
+
     .nav-buttons {
       margin-top: 2rem;
     }
+
     .nav-buttons a {
       display: inline-block;
       margin-right: 10px;
@@ -54,80 +97,60 @@
       text-decoration: none;
       color: #000;
     }
+
     .nav-buttons a:hover {
       background: #ddd;
     }
-
-    /* ✅ Neu: schön ausgerichtete Checkboxen / Radios */
-    .inline-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 1rem;
-    }
-
-    .inline-option input[type="checkbox"],
-    .inline-option input[type="radio"] {
-      margin: 0;
-    }
-    .checkbox-line,
-.radio-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 1rem;
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-  margin: 0;
-  transform: scale(1.1); /* optional: größer & besser klickbar */
-}
   </style>
 </head>
 <body>
   <h1>SPPB – Short Physical Performance Battery</h1>
   <p>Test für physische Leistungsfähigkeit der unteren Extremitäten.</p>
-  <p> Im Cenplex Behandlungsplan als <strong> "Messung" </strong> mir Einzelwerten eintragen.</p>
-  <p> Bei Bedarf hier eintragen für Normwerte und Score-Berechnung.</p>
+  <p>Im Cenplex Behandlungsplan als <strong>„Messung“</strong> mit Einzelwerten eintragen.</p>
+  <p>Bei Bedarf hier eintragen für Normwerte und Score-Berechnung.</p>
   <p>
     Detailliertes Durchführungsprotokoll hier:
     <a href="Zusatzmaterial/SPPB_Protokoll.pdf" target="_blank">SPPB Protokoll (PDF)</a>
   </p>
 
-<form>
-  <div class="checkbox-line">
-    <input type="checkbox" id="standZusammen">
-    <label for="standZusammen">Füße zusammen >10s</label>
-  </div>
+  <form>
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" id="standZusammen" />
+        Füße zusammen >10s
+      </label>
+    </div>
 
-  <div class="checkbox-line">
-    <input type="checkbox" id="semitandem">
-    <label for="semitandem">Semitandem >10s</label>
-  </div>
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" id="semitandem" />
+        Semitandem >10s
+      </label>
+    </div>
 
-  <label for="tandemZeit">Tandem-Zeit (Sek.):</label>
-  <input type="number" id="tandemZeit" step="0.01">
+    <label for="tandemZeit">Tandem-Zeit (Sek.):</label>
+    <input type="number" id="tandemZeit" step="0.01" />
 
-  <label>Strecke:</label>
-  <div class="radio-line">
-    <input type="radio" name="strecke" value="3" id="s3" checked>
-    <label for="s3">3 m</label>
-  </div>
-  <div class="radio-line">
-    <input type="radio" name="strecke" value="4" id="s4">
-    <label for="s4">4 m</label>
-  </div>
+    <label>Strecke:</label>
+    <div class="radio-group">
+      <label>
+        <input type="radio" name="strecke" value="3" checked />
+        3 m
+      </label>
+      <label>
+        <input type="radio" name="strecke" value="4" />
+        4 m
+      </label>
+    </div>
 
-  <label for="gehzeit">Zeit (Sek.):</label>
-  <input type="number" id="gehzeit" step="0.01">
+    <label for="gehzeit">Zeit (Sek.):</label>
+    <input type="number" id="gehzeit" step="0.01" />
 
-  <label for="sitzStand">5x Sitz-Stand (Sek.):</label>
-  <input type="number" id="sitzStand" step="0.01">
+    <label for="sitzStand">5x Sitz-Stand (Sek.):</label>
+    <input type="number" id="sitzStand" step="0.01" />
 
-  <button type="button" onclick="calculateSPPB()">✅ Score berechnen</button>
-</form>
-
+    <button type="button" onclick="calculateSPPB()">✅ Score berechnen</button>
+  </form>
 
   <div id="result"></div>
 
