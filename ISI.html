@@ -36,7 +36,6 @@
   <form id="isiForm"></form>
 
   <button type="button" onclick="calculateISI()">✅ Score berechnen</button>
-  <button type="button" onclick="downloadPDF()">📄 Als PDF speichern</button>
 
   <div id="result"></div>
   <div id="interpretation"></div>
@@ -105,40 +104,6 @@
       } else {
         additional.innerHTML = "";
       }
-    }
-
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-      doc.setFontSize(16);
-      doc.text("Insomnia Severity Index (ISI) - Auswertung", 10, y);
-      y += 10;
-
-      items.forEach((item, idx) => {
-        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-        if (selected) {
-          doc.setFontSize(12);
-          doc.text(`${item} Antwort: ${options[selected.value]}`, 10, y);
-          y += 8;
-        }
-      });
-
-      const result = document.getElementById("result").innerText;
-      const interp = document.getElementById("interpretation").innerText;
-      const additional = document.getElementById("additional").innerText;
-
-      y += 10;
-      doc.setFontSize(14);
-      doc.text(result, 10, y += 7);
-      doc.text(interp, 10, y += 7);
-      if (additional) {
-        doc.setFontSize(12);
-        doc.setTextColor(200, 0, 0);
-        doc.text(additional, 10, y += 10);
-      }
-
-      doc.save("isi-auswertung.pdf");
     }
 
     renderForm();
