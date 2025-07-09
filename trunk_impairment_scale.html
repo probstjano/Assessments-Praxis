@@ -180,35 +180,77 @@
         `Dynamische Balance: ${state.score.dynamic} / 10\n` +
         `Koordination: ${state.score.coordination} / 6`;
     }
+async function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    function exportPDF() {
-      const doc = new jsPDF();
-      let y = 10;
-      doc.setFontSize(16);
-      doc.text("Trunk Impairment Scale – Auswertung", 10, y);
-      y += 10;
+  // Roboto einbinden, falls verfügbar
+  if (window.robotoBase64) {
+    doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+    doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+    doc.setFont("Roboto", "normal");
+  }
 
-      items.forEach(item => {
-        if (state.values[item.id] !== undefined) {
-          const label = item.text;
-          const value = item.options.find(o => o.value === state.values[item.id])?.text || "";
-          doc.setFontSize(12);
-          doc.text(`${label}: ${value}`, 10, y);
-          y += 7;
+  const lineHeight = 8;
+  const left = 15;
+  const right = 190;
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text("Trunk Impairment Scale – Auswertung", left, y);
+  y += lineHeight;
+
+  doc.setFontSize(12);
+  doc.line(left, y, right, y);
+  y += 5;
+
+  for (const item of items) {
+    if (state.values[item.id] !== undefined) {
+      const label = `${item.text}`;
+      const valueText = item.options.find(o => o.value === state.values[item.id])?.text || "-";
+
+      const lines = doc.splitTextToSize(label, 160);
+      lines.forEach((line, idx) => {
+        doc.text(line, left, y);
+        if (idx === 0) {
+          doc.text(valueText, right, y, { align: "right" });
         }
+        y += lineHeight;
       });
-
-      y += 10;
-      doc.setFontSize(14);
-      doc.text(`Gesamtscore: ${state.score.static + state.score.dynamic + state.score.coordination} / 21`, 10, y);
-      y += 7;
-      doc.text(`Statische Balance: ${state.score.static} / 5`, 10, y += 7);
-      doc.text(`Dynamische Balance: ${state.score.dynamic} / 10`, 10, y += 7);
-      doc.text(`Koordination: ${state.score.coordination} / 6`, 10, y += 7);
-
-      window.open(doc.output("bloburl"), "_blank");
+      y += 2;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
     }
+  }
 
+  y += 5;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Subscores", left, y);
+  y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+
+  doc.text(`Statische Balance: ${state.score.static} / 5`, left, y); y += lineHeight;
+  doc.text(`Dynamische Balance: ${state.score.dynamic} / 10`, left, y); y += lineHeight;
+  doc.text(`Koordination: ${state.score.coordination} / 6`, left, y); y += lineHeight;
+
+  y += 5;
+  const total = state.score.static + state.score.dynamic + state.score.coordination;
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(14);
+  doc.text("Gesamtergebnis", left, y); y += lineHeight;
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`TIS Gesamt-Score: ${total} / 21`, left, y); y += lineHeight;
+
+  const today = new Date().toLocaleDateString("de-CH");
+  doc.text(`Datum: ${today}`, left, y);
+
+  doc.save("TIS_Auswertung.pdf");
+}
     renderForm();
   </script>
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
