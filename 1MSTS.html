@@ -62,7 +62,7 @@
     <input type="number" id="BORG" min="0" max="10" />
 
      <label>BORG Dyspnoe 0-10:</label>
-    <input type="number" id="BORG" min="0" max="10" />
+    <input type="number" id="BORGD" min="0" max="10" />
 
     <label>Alter:</label>
     <input type="number" id="age" min="18" max="100" />
@@ -198,12 +198,19 @@
       doc.setFontSize(12);
 
       const reps = document.getElementById("reps").value;
-      const age = document.getElementById("age").value;
-      const sex = document.getElementById("sex").value;
+      const HFvor = document.getElementById("HFvor").value;
+      const HFnach = document.getElementById("HFnach").value;
+      const SPO2vor = document.getElementById("SPO2vor").value;
+      const SPO2nach = document.getElementById("SPO2nach").value;
+      const BORG = document.getElementById("BORG").value;
+      const BORGD = document.getElementById("BORGD").value;
       doc.text(`Wiederholungen: ${reps}`, 10, 30);
-      doc.text(`Alter: ${age}`, 10, 38);
-      doc.text(`Geschlecht: ${sex === "men" ? "Männlich" : "Weiblich"}`, 10, 46);
-
+      doc.text(`Herzfrequenz vor Test: ${HFvor}`, 10, 38);
+      doc.text(`Herzfrequenz nach Test: ${HFnach}`, 10, 46);
+      doc.text(`SPO2 vor Test: ${SPO2vor}`, 10, 54);
+      doc.text(`SPO2 nach Test: ${SPO2nach}`, 10, 62);
+      doc.text(`BORG Anstrengung: ${BORG}`, 10, 70);
+      doc.text(`BORG Dyspnoe: ${BORGD}`, 10, 78);
       doc.text("Normdaten siehe Webtool.", 10, 60);
       window.open(doc.output("bloburl"), "_blank");
     }
