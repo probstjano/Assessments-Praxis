@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
-<meta charset="utf-8"/>
-<title>6-Minuten-Gehtest – Auswertung</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<style>
+  <meta charset="utf-8" />
+  <title>6-Minuten-Gehtest – Auswertung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
     body {
       font-family: sans-serif;
       padding: 20px;
@@ -31,98 +30,135 @@
       white-space: pre-line;
     }
   </style>
-<script src="robotoBase64.js"></script></head>
+  <script src="robotoBase64.js"></script>
+</head>
+
 <body>
-<h1>6-Minuten-Gehtest</h1>
-<p>Test für submaximale aerobe Ausdauer/funktionelle Gehfähigkeit.</p>
-<p>Im Cenplex Behandlungsplan unter <strong> "Messung" </strong> eintragen. Hier eintragen für Normwerte und für Zusatzinfos </p>
-<p> Normwerte veriieren je nach Quelle. Diese Normwerte basieren auf der Studie mit der grössten Stichprobe an <strong> gesunden </strong> Personen und wurden nur für Personen zwschen 30-80Jahre untersucht. 
-Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung. </p>
-<p> Durchführungsprotokoll hier:
-<a href="6MWT_Protokoll.pdf" target="_blank">6MWT Protokoll (PDF)</a>
-</p>
-<label>Gelaufene Distanz (m):</label><input id="distance" required="" type="number"/>
-<label>Alter (Jahre):</label><input id="age" required="" type="number"/>
-<label>Körpergröße (cm):</label><input id="height" required="" type="number"/>
-<label>HF vor (bpm):</label><input id="hf_pre" type="number"/>
-<label>HF nach (bpm):</label><input id="hf_post" type="number"/>
-<label>SpO₂ vor (%):</label><input id="spo2_pre" type="number"/>
-<label>SpO₂ nach (%):</label><input id="spo2_post" type="number"/>
-<label>BORG Anstrengung (0–10):</label><input id="borg_effort" max="10" min="0" type="number"/>
-<label>BORG Dyspnoe (0–10):</label><input id="borg_dyspnea" max="10" min="0" type="number"/>
-<button onclick="calculateNorm()">📊 Normwerte berechnen</button>
-<button onclick="generatePDF()">📄 PDF erstellen</button>
-<div id="result"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
-  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
-  doc.setFont("Roboto", "normal");
-  doc.setFontSize(14);
+  <h1>6-Minuten-Gehtest</h1>
+  <p>Test für submaximale aerobe Ausdauer / funktionelle Gehfähigkeit.</p>
+  <p>Im Cenplex Behandlungsplan unter <strong>"Messung"</strong> eintragen. Hier eintragen für Normwerte und Zusatzinfos.</p>
+  <p>
+    Normwerte variieren je nach Quelle. Diese Normwerte basieren auf der Studie mit der größten Stichprobe an
+    <strong>gesunden</strong> Personen und wurden nur für Personen zwischen 30–80 Jahren untersucht.
+    Referenzwertangaben für ältere Personen basieren auf einer Hochrechnung.
+  </p>
+  <p>
+    Durchführungsprotokoll hier:
+    <a href="6MWT_Protokoll.pdf" target="_blank">6MWT Protokoll (PDF)</a>
+  </p>
 
-  let y = 15;
-  const left = 15;
-  const right = 190;
-  const lineHeight = 8;
-  let total = 0;
-  let questionNumber = 1;
-  const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
+  <label>Gelaufene Distanz (m):</label>
+  <input type="number" id="distance" required />
 
-  for (let i = 1; i <= 14; i++) {
-    const sel = document.querySelector(`select[name='q${i}']`);
-    if (!sel || sel.value === "") continue;
-    const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
-    const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
-    const fullLine = `${questionNumber}. ${labelText}`;
-    const wrappedLines = doc.splitTextToSize(fullLine, 160);
-    const val = parseInt(sel.value);
-    total += val;
-    if (i <= 3) subscores.ant += val;
-    else if (i <= 6) subscores.reak += val;
-    else if (i <= 9) subscores.sens += val;
-    else subscores.dyn += val;
-    wrappedLines.forEach((line, idx) => {
-      doc.text(line, left, y);
-      if (idx === 0) {
-        doc.text(`${val}`, right, y, { align: "right" });
+  <label>Alter (Jahre):</label>
+  <input type="number" id="age" required />
+
+  <label>Körpergröße (cm):</label>
+  <input type="number" id="height" required />
+
+  <label>HF vor (bpm):</label>
+  <input type="number" id="hf_pre" />
+
+  <label>HF nach (bpm):</label>
+  <input type="number" id="hf_post" />
+
+  <label>SpO₂ vor (%):</label>
+  <input type="number" id="spo2_pre" />
+
+  <label>SpO₂ nach (%):</label>
+  <input type="number" id="spo2_post" />
+
+  <label>BORG Anstrengung (0–10):</label>
+  <input type="number" id="borg_effort" min="0" max="10" />
+
+  <label>BORG Dyspnoe (0–10):</label>
+  <input type="number" id="borg_dyspnea" min="0" max="10" />
+
+  <button onclick="calculateNorm()">📊 Normwerte berechnen</button>
+  <button onclick="generatePDF()">📄 PDF erstellen</button>
+
+  <div id="result"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto", "normal");
+      doc.setFontSize(14);
+
+      let y = 15;
+      const left = 15;
+      const right = 190;
+      const lineHeight = 8;
+      let total = 0;
+      let questionNumber = 1;
+      const subscores = { ant: 0, reak: 0, sens: 0, dyn: 0 };
+
+      for (let i = 1; i <= 14; i++) {
+        const sel = document.querySelector(`select[name='q${i}']`);
+        if (!sel || sel.value === "") continue;
+
+        const rawLabel = document.querySelector(`label[for='q${i}']`).innerText;
+        const labelText = rawLabel.replace(/^[0-9]+\.\s*/, "").trim();
+        const fullLine = `${questionNumber}. ${labelText}`;
+        const wrappedLines = doc.splitTextToSize(fullLine, 160);
+        const val = parseInt(sel.value);
+        total += val;
+
+        if (i <= 3) subscores.ant += val;
+        else if (i <= 6) subscores.reak += val;
+        else if (i <= 9) subscores.sens += val;
+        else subscores.dyn += val;
+
+        wrappedLines.forEach((line, idx) => {
+          doc.text(line, left, y);
+          if (idx === 0) {
+            doc.text(`${val}`, right, y, { align: "right" });
+          }
+          y += lineHeight;
+        });
+
+        y += 2;
+        questionNumber++;
+
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
       }
+
+      y += 5;
+      doc.setFontSize(13);
+      doc.setFont(undefined, "bold");
+      doc.text("Subscores", left, y);
       y += lineHeight;
-    });
-    y += 2;
-    questionNumber++;
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(12);
+      doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
+      doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
+      doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
+      doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
+
+      y += 5;
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(14);
+      doc.text("Gesamtergebnis", left, y); y += lineHeight;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(12);
+      doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
+
+      const today = new Date().toLocaleDateString("de-CH");
+      doc.text(`Datum: ${today}`, left, y);
+
+      doc.save("MiniBEST_Auswertung.pdf");
     }
-  }
+  </script>
 
-  y += 5;
-  doc.setFontSize(13);
-  doc.setFont(undefined, "bold");
-  doc.text("Subscores", left, y); y += lineHeight;
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(12);
-  doc.text(`Antizipatorisch: ${subscores.ant} / 6`, left, y); y += lineHeight;
-  doc.text(`Reaktiv-postural: ${subscores.reak} / 6`, left, y); y += lineHeight;
-  doc.text(`Sensorisch: ${subscores.sens} / 6`, left, y); y += lineHeight;
-  doc.text(`Dynamischer Gang: ${subscores.dyn} / 10`, left, y); y += lineHeight;
-
-  y += 5;
-  doc.setFont(undefined, "bold");
-  doc.setFontSize(14);
-  doc.text("Gesamtergebnis", left, y); y += lineHeight;
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(12);
-  doc.text(`Mini-BESTest Gesamtscore: ${total} / 28`, left, y); y += lineHeight;
-  const today = new Date().toLocaleDateString("de-CH");
-  doc.text(`Datum: ${today}`, left, y);
-
-  doc.save("MiniBEST_Auswertung.pdf");
-}
-</script>
-<p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
+  <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
