@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Berg Balance Skala (BBS)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BBS - Berg Balance Scale </title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="robotoBase64.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 2rem; font-size: 16px; max-width: 1000px; }
-    .question-block { margin-bottom: 1.5rem; }
-    .question { font-weight: bold; margin-bottom: 0.5rem; }
-    select, input[type="number"] { width: 100%; padding: 8px; font-size: 16px; margin-bottom: 1rem; }
-    button { margin-top: 20px; padding: 10px 15px; font-size: 16px; }
-    #scoreDisplay, #result { margin-top: 2rem; font-weight: bold; white-space: pre-line; }
-    #normInfo { margin-top: 1rem; font-size: 0.9em; color: #333; }
-    #normBlock { display: none; margin-top: 1rem; }
-    .nav-buttons { margin-top: 3rem; }
+    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
+    label { display: block; margin: 10px 0 5px; }
+    select {
+      width: 100%;
+      padding: 6px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+    #result { font-weight: bold; margin-top: 20px; }
+    .nav-buttons { margin-top: 30px; }
     .nav-buttons a {
       display: inline-block;
       margin-right: 10px;
@@ -24,6 +28,7 @@
       color: #000;
     }
     .nav-buttons a:hover { background: #ddd; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -236,36 +241,54 @@
 
     
 async function generatePDF() {
+  if (currentScore === null) {
+    alert("Bitte zuerst auf 'Score berechnen' klicken.");
+    return;
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const lineHeight = 8;
-  const left = 10;
-  const right = 180;
-  let y = 20;
+  doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+  doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+  doc.setFont("Roboto", "normal");
 
-  doc.setFont("helvetica", "normal");
+  const left = 15;
+  const right = 190;
+  const lineHeight = 8;
+  let y = 15;
+  let questionNumber = 1;
+
   doc.setFontSize(16);
-  doc.text(`BBS ${useShort ? "Kurzversion" : "Vollversion"} – Auswertung`, left, y);
+  doc.text("Berg Balance Scale (BBS) – Auswertung", left, y);
   y += lineHeight;
 
   doc.setFontSize(12);
-  doc.line(left, y, 200, y);
+  doc.line(left, y, right, y);
   y += 5;
 
   const items = useShort ? shortIndexes.map(i => fullQuestions[i]) : fullQuestions;
-  let total = 0;
 
   for (let idx = 0; idx < items.length; idx++) {
     const fullIndex = useShort ? shortIndexes[idx] : idx;
-    const q = items[idx];
     const sel = document.querySelector(`select[name='q${fullIndex}']`);
     if (!sel || sel.value === "") continue;
+
     const val = parseInt(sel.value);
-    total += val;
-    const text = `${fullIndex + 1}. ${q.text}`;
-    doc.text(text, left, y);
-    doc.text(`${val}`, right, y, { align: "right" });
-    y += lineHeight;
+    const rawText = items[idx].text;
+    const fullLine = `${questionNumber}. ${rawText}`;
+    const wrapped = doc.splitTextToSize(fullLine, 160);
+
+    wrapped.forEach((line, i) => {
+      doc.text(line, left, y);
+      if (i === 0) {
+        doc.text(`${val}`, right, y, { align: "right" });
+      }
+      y += lineHeight;
+    });
+
+    y += 2;
+    questionNumber++;
+
     if (y > 270) {
       doc.addPage();
       y = 20;
@@ -273,17 +296,20 @@ async function generatePDF() {
   }
 
   const max = useShort ? 28 : 56;
-  y += 5;
-  doc.setFontSize(14);
-  doc.text(`Gesamtscore: ${total} / ${max}`, left, y);
-
   const today = new Date().toLocaleDateString("de-CH");
-  doc.text(`Datum: ${today}`, 150, y);
+
+  y += 5;
+  doc.setFontSize(13);
+  doc.setFont(undefined, "bold");
+  doc.text("Gesamtergebnis:", left, y); y += lineHeight;
+
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(12);
+  doc.text(`Gesamtscore: ${currentScore} / ${max}`, left, y); y += lineHeight;
+  doc.text(`Datum: ${today}`, left, y);
 
   doc.save("BBS_Auswertung.pdf");
 }
-
-
     renderForm();
   </script>
   <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
