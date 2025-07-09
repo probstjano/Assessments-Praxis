@@ -70,50 +70,64 @@
     .inline-option input[type="radio"] {
       margin: 0;
     }
+    .checkbox-line,
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  margin: 0;
+  transform: scale(1.1); /* optional: größer & besser klickbar */
+}
   </style>
 </head>
 <body>
   <h1>SPPB – Short Physical Performance Battery</h1>
   <p>Test für physische Leistungsfähigkeit der unteren Extremitäten.</p>
   <p> Im Cenplex Behandlungsplan als <strong> "Messung" </strong> mir Einzelwerten eintragen.</p>
+  <p> Bei Bedarf hier eintragen für Normwerte und Score-Berechnung.</p>
   <p>
     Detailliertes Durchführungsprotokoll hier:
     <a href="Zusatzmaterial/SPPB_Protokoll.pdf" target="_blank">SPPB Protokoll (PDF)</a>
   </p>
-  <p><strong>Nur bei Bedarf hier eintragen</strong> für Infos, Normwerte und Score-Berechnung.</p>
 
-  <form>
-    <div class="inline-option">
-      <input type="checkbox" id="standZusammen">
-      <label for="standZusammen">Füße zusammen >10s</label>
-    </div>
+<form>
+  <div class="checkbox-line">
+    <input type="checkbox" id="standZusammen">
+    <label for="standZusammen">Füße zusammen >10s</label>
+  </div>
 
-    <div class="inline-option">
-      <input type="checkbox" id="semitandem">
-      <label for="semitandem">Semitandem >10s</label>
-    </div>
+  <div class="checkbox-line">
+    <input type="checkbox" id="semitandem">
+    <label for="semitandem">Semitandem >10s</label>
+  </div>
 
-    <label for="tandemZeit">Tandem-Zeit (Sek.):</label>
-    <input type="number" id="tandemZeit" step="0.01">
+  <label for="tandemZeit">Tandem-Zeit (Sek.):</label>
+  <input type="number" id="tandemZeit" step="0.01">
 
-    <label>Strecke:</label>
-    <div class="inline-option">
-      <input type="radio" name="strecke" value="3" id="s3" checked>
-      <label for="s3">3 m</label>
-    </div>
-    <div class="inline-option">
-      <input type="radio" name="strecke" value="4" id="s4">
-      <label for="s4">4 m</label>
-    </div>
+  <label>Strecke:</label>
+  <div class="radio-line">
+    <input type="radio" name="strecke" value="3" id="s3" checked>
+    <label for="s3">3 m</label>
+  </div>
+  <div class="radio-line">
+    <input type="radio" name="strecke" value="4" id="s4">
+    <label for="s4">4 m</label>
+  </div>
 
-    <label for="gehzeit">Zeit (Sek.):</label>
-    <input type="number" id="gehzeit" step="0.01">
+  <label for="gehzeit">Zeit (Sek.):</label>
+  <input type="number" id="gehzeit" step="0.01">
 
-    <label for="sitzStand">5x Sitz-Stand (Sek.):</label>
-    <input type="number" id="sitzStand" step="0.01">
+  <label for="sitzStand">5x Sitz-Stand (Sek.):</label>
+  <input type="number" id="sitzStand" step="0.01">
 
-    <button type="button" onclick="calculateSPPB()">✅ Score berechnen</button>
-  </form>
+  <button type="button" onclick="calculateSPPB()">✅ Score berechnen</button>
+</form>
+
 
   <div id="result"></div>
 
