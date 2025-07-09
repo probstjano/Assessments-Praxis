@@ -3,18 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DEMMI – De Morton Mobility Index</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="robotoBase64.js"></script>
+  <title>2-Minuten Step Test</title>
   <style>
-    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
-    label { display: block; margin: 10px 0 5px; }
-    select {
-      width: 100%;
-      padding: 6px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
+    body { font-family: sans-serif; margin: 2rem; font-size: 16px; max-width: 700px; }
+    label { display: block; margin-top: 1rem; }
+    input, select { width: 100%; padding: 6px; font-size: 16px; margin-bottom: 10px; }
     button { margin-top: 10px; padding: 10px 15px; font-size: 16px; }
     #result, #normwerte { font-weight: bold; margin-top: 20px; white-space: pre-line; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
@@ -27,6 +20,45 @@
       background: #eee; border-radius: 8px; text-decoration: none; color: #000;
     }
     .nav-buttons a:hover { background: #ddd; }
+  </style>
+</head>
+<body>
+  <h1>2-Minuten Step Test</h1>
+  <p>Test zur Beurteilung der kardiovaskulären Ausdauerleistungsfähigkeit.</p>
+  <p>Im Cenplex-Behandlungsplan als <strong>Messung</strong> hinterlegt. Hier eintragen für Normwerte.</p>
+  <p>Detailliertes Protokoll hier:
+    <a href="2MST.pdf" target="_blank">2MST Protokoll (PDF)</a></p>
+
+  <form>
+    <label>Anzahl Schritte in 2 Minuten:</label>
+    <input type="number" id="steps" min="0" step="1">
+    <label>Alter:</label>
+    <input type="number" id="age" min="60" max="100">
+    <label>Geschlecht:</label>
+    <select id="sex">
+      <option value="men">Männlich</option>
+      <option value="women">Weiblich</option>
+    </select>
+    <label>HF vor (bpm):</label>
+    <input type="number" id="hf_pre">
+    <label>HF nach (bpm):</label>
+    <input type="number" id="hf_post">
+    <label>SpO₂ vor (%):</label>
+    <input type="number" id="spo2_pre">
+    <label>SpO₂ nach (%):</label>
+    <input type="number" id="spo2_post">
+    <label>BORG Anstrengung (0–10):</label>
+    <input type="number" id="borg_effort" min="0" max="10">
+    <button type="button" onclick="calculateNorm()">✅ Normwerte anzeigen</button>
+    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
+  </form>
+
+  <div id="result"></div>
+  <div id="normwerte" class="hidden"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="robotoBase64.js"></script>
+  
   </style>
 </head>
 <body>
