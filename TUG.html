@@ -129,32 +129,6 @@
       norms.classList.remove("hidden");
     }
 
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-
-      const age = document.getElementById("age").value;
-      const sex = document.getElementById("sex").value;
-      const zeit = document.getElementById("tugzeit").value;
-      const result = document.getElementById("result").innerText;
-
-      doc.setFontSize(16);
-      doc.text("Timed Up and Go (TUG) - Auswertung", 10, y);
-      y += 10;
-      doc.setFontSize(12);
-      doc.text(`Alter: ${age}`, 10, y += 7);
-      doc.text(`Geschlecht: ${sex === 'male' ? 'Männlich' : 'Weiblich'}`, 10, y += 7);
-      doc.text(`Gemessene Zeit: ${zeit} Sekunden`, 10, y += 7);
-      y += 10;
-
-      result.split("\n").forEach(line => {
-        doc.text(line, 10, y);
-        y += 7;
-      });
-
-      doc.save("tug-auswertung.pdf");
-    }
   </script>
 <p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
 </body>
