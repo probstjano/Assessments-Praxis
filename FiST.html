@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FiST – Function in Sitting Test</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="robotoBase64.js"></script>
   <style>
     body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
     label { display: block; margin: 10px 0 5px; }
@@ -33,20 +33,18 @@
 <body>
   <h1>FiST – Function in Sitting Test</h1>
   <p>Bewertung der Funktion im Sitzen (z. B. nach Schlaganfall oder bei Rumpfkontrollstörungen).</p>
-  <p>Geeignet wenn Sitzen einzig mögliche oder wichitgste Aktivität/Funktion ist</p>
-  
-  <p><strong>Positionierung:</strong> bevorzugt im Bett, ½ Femur auf Sitzfläche, Hüft- & Kniegelenke 90°, ggf. Hocker für Fußunterstützung um entsprechende Winkel zu erreiche, Hände auf Schoss </p>
-  <p>Detaillierte Beschreibung hier:  <a href="https://www.samuelmerritt.edu/fist/items" target="_blank">zur Webseite</a> </p>
-  
+  <p>Geeignet wenn Sitzen einzig mögliche oder wichtigste Aktivität/Funktion ist.</p>
+
+  <p><strong>Positionierung:</strong> bevorzugt im Bett, ½ Femur auf Sitzfläche, Hüft- & Kniegelenke 90°, ggf. Hocker für Fußunterstützung, Hände auf Schoss.</p>
+  <p>Detaillierte Beschreibung hier: <a href="https://www.samuelmerritt.edu/fist/items" target="_blank">zur Webseite</a></p>
+
   <form id="fistForm">
     <div id="questions"></div>
     <button type="button" onclick="calculateFiST()">✅ Score berechnen</button>
-    <button type="button" onclick="downloadPDF()">📄 Als PDF speichern</button>
+    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
   </form>
 
   <p id="result"></p>
-
-  
 
   <script>
     const questions = [
@@ -76,12 +74,10 @@
 
     const container = document.getElementById("questions");
     questions.forEach((text, i) => {
-      let optionsHTML = "";
-      options.forEach(opt => {
-        optionsHTML += `<option value="${opt.value}">${opt.label}</option>`;
-      });
-      const html = `<label>${text}<select name="q${i}">${optionsHTML}</select></label>`;
-      container.innerHTML += html;
+      let optionsHTML = options.map(opt =>
+        `<option value="${opt.value}" ${opt.value === 0 ? "selected" : ""}>${opt.label}</option>`
+      ).join("");
+      container.innerHTML += `<label>${text}<select name="q${i}">${optionsHTML}</select></label>`;
     });
 
     function calculateFiST() {
@@ -94,32 +90,66 @@
       document.getElementById("result").innerText = `Gesamt-Score: ${score}/${max}`;
     }
 
-    async function downloadPDF() {
+    async function generatePDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const form = document.forms["fistForm"];
-      let y = 10;
 
-      doc.text("FiST-Auswertung", 10, y);
-      y += 10;
+      // ✅ Roboto einbinden
+      doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto", "normal");
+
+      const form = document.forms["fistForm"];
+      let y = 15;
+      const left = 15;
+      const right = 190;
+      const lineHeight = 8;
+
+      doc.setFontSize(16);
+      doc.text("FiST – Function in Sitting Test", left, y);
+      y += lineHeight;
+
+      doc.setFontSize(12);
+      doc.line(left, y, right, y);
+      y += 5;
 
       for (let i = 0; i < questions.length; i++) {
-        const selectedValue = form["q" + i].value;
-        const optionLabel = options.find(opt => opt.value.toString() === selectedValue)?.label || "Keine Auswahl";
-        doc.text(`${questions[i]}: ${optionLabel}`, 10, y);
-        y += 7;
-        if (y > 280) {
+        const sel = form["q" + i];
+        const val = parseInt(sel.value);
+        const label = questions[i];
+        const wrapped = doc.splitTextToSize(label, 160);
+
+        wrapped.forEach((line, idx) => {
+          doc.text(line, left, y);
+          if (idx === 0) {
+            doc.text(`${val}`, right, y, { align: "right" });
+          }
+          y += lineHeight;
+        });
+        y += 2;
+
+        if (y > 270) {
           doc.addPage();
-          y = 10;
+          y = 20;
         }
       }
 
+      const resultText = document.getElementById("result").innerText || "";
       y += 5;
-      const resultText = document.getElementById("result").innerText || "Kein Ergebnis berechnet.";
-      doc.text(resultText, 10, y);
-      doc.save("fist-ergebnis.pdf");
+      doc.setFont(undefined, "bold");
+      doc.text("Gesamtergebnis", left, y);
+      y += lineHeight;
+      doc.setFont(undefined, "normal");
+      doc.text(resultText, left, y);
+
+      const today = new Date().toLocaleDateString("de-CH");
+      y += lineHeight;
+      doc.text(`Datum: ${today}`, left, y);
+
+      doc.save("FiST_Auswertung.pdf");
     }
   </script>
-<p><a href="index.html"> ⬅️ Zurück zur Hauptseite</a></p>
+
+  <p><a href="index.html">⬅️ Zurück zur Hauptseite</a></p>
 </body>
 </html>
