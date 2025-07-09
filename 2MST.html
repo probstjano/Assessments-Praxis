@@ -88,51 +88,58 @@
     }
   };
 
-  function getAgeGroup(age) {
-    const groups = ["60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90-94"];
-    for (let g of groups) {
-      const [min, max] = g.split("-").map(Number);
-      if (age >= min && age <= max) return g;
-    }
-    return "90-94";
+function getAgeGroup(age) {
+  const groups = ["60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90-94"];
+  for (let g of groups) {
+    const [min, max] = g.split("-").map(Number);
+    if (age >= min && age <= max) return g;
+  }
+  return null; // 👈 Alter liegt außerhalb der Gruppen
+}
+
+function calculateNorm() {
+  const steps = parseInt(document.getElementById("steps").value);
+  const age = parseInt(document.getElementById("age").value);
+  const sex = document.getElementById("sex").value;
+  const resultDiv = document.getElementById("result");
+  const normDiv = document.getElementById("normwerte");
+
+  if (isNaN(steps) || isNaN(age)) {
+    resultDiv.innerText = "Bitte Schritte und Alter korrekt eingeben.";
+    return;
   }
 
-  function calculateNorm() {
-    const steps = parseInt(document.getElementById("steps").value);
-    const age = parseInt(document.getElementById("age").value);
-    const sex = document.getElementById("sex").value;
-    const resultDiv = document.getElementById("result");
-    const normDiv = document.getElementById("normwerte");
+  const ageGroup = getAgeGroup(age);
 
-    if (isNaN(steps) || isNaN(age)) {
-      resultDiv.innerText = "Bitte Schritte und Alter korrekt eingeben.";
-      return;
-    }
-
-    const ageGroup = getAgeGroup(age);
-    const norms = normData[sex][ageGroup];
-    const percentiles = [10, 25, 50, 75, 90];
-    let percentile = "-";
-
-    for (let i = 0; i < norms.length; i++) {
-      if (steps <= norms[i]) {
-        percentile = percentiles[i];
-        break;
-      }
-    }
-    if (steps > norms[norms.length - 1]) percentile = ">90";
-
-    normDiv.innerHTML =
-      `<h3>US-Amerikansiche Normwerte 1999 (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'})</h3>
-      <table><tr><th>Perzentil</th><th>Schritte</th></tr>
-      ${percentiles.map((p, i) => `<tr><td>P${p}</td><td>${norms[i]}</td></tr>`).join("")}
-      </table>`;
-
-    resultDiv.innerHTML =
-      `Anzahl Schritte: ${steps}<br>→ Dieser Wert ist besser als ca. <strong>${percentile}</strong>% der Vergleichsgruppe (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'}).`;
-    normDiv.classList.remove("hidden");
+  if (!ageGroup) {
+    resultDiv.innerHTML = `Anzahl Schritte: ${steps}<br>⚠️ Für Alter unter 60 oder über 94 sind keine Normdaten verfügbar.`;
+    normDiv.classList.add("hidden");
+    return;
   }
 
+  const norms = normData[sex][ageGroup];
+  const percentiles = [10, 25, 50, 75, 90];
+  let percentile = "-";
+
+  for (let i = 0; i < norms.length; i++) {
+    if (steps <= norms[i]) {
+      percentile = percentiles[i];
+      break;
+    }
+  }
+  if (steps > norms[norms.length - 1]) percentile = ">90";
+
+  normDiv.innerHTML =
+    `<h3>US-Amerikanische Normwerte 1999 (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'})</h3>
+    <table><tr><th>Perzentil</th><th>Schritte</th></tr>
+    ${percentiles.map((p, i) => `<tr><td>P${p}</td><td>${norms[i]}</td></tr>`).join("")}
+    </table>`;
+
+  resultDiv.innerHTML =
+    `Anzahl Schritte: ${steps}<br>→ Dieser Wert ist besser als ca. <strong>${percentile}</strong>% der Vergleichsgruppe (${ageGroup}, ${sex === 'men' ? 'Männer' : 'Frauen'}).`;
+
+  normDiv.classList.remove("hidden");
+}
 <script>
   async function generatePDF() {
     const { jsPDF } = window.jspdf;
