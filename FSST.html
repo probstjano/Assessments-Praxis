@@ -42,8 +42,7 @@
   <form>
     <label>Benötigte Zeit für schnelleren von zwei Durchgängen (Sekunden):</label>
     <input type="number" id="zeit" step="0.01" min="0">
-    <button type="button" onclick="zeigeErgebnis()">✅ Ergebnis anzeigen</button>
-    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
+    <button type="button" onclick="zeigeErgebnis()">✅ Empfohlene cut-offs anzeigen n</button>
   </form>
 
   <div id="result"></div>
@@ -62,22 +61,6 @@
       document.getElementById("result").innerText = 
         `Erfasste Zeit: ${zeit} Sekunden\n\nHinweis (nur für Version mit Stöcken):\n– Ältere Erwachsene: >15s = erhöhtes Sturzrisiko\n– Schlaganfall: >15s oder Versuch nicht erfolgreich\n– Parkinson: >9,68s = erhöhtes Sturzrisiko\n– Vestibularstörung: >12s = erhöhtes Sturzrisiko\n– Amputation: >24s = erhöhtes Sturzrisiko`;
     }
-
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-
-      doc.setFontSize(16);
-      doc.text("Four Square Step Test – Auswertung", 10, y);
-      y += 10;
-
-      const text = document.getElementById("result").innerText.split("\n");
-      doc.setFontSize(12);
-      text.forEach(line => {
-        doc.text(line, 10, y);
-        y += 8;
-      });
 
       window.open(doc.output('bloburl'), '_blank');
     }
