@@ -90,32 +90,70 @@
       }
       document.getElementById("result").innerText = `Gesamtscore: ${total} / 24`;
     }
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(16);
-      doc.text("FOG-Q – Auswertung", 10, 15);
-      doc.setFontSize(12);
-      let y = 25;
-      let total = 0;
+  // Roboto einbinden, wenn verfügbar
+  if (window.robotoBase64) {
+    doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+    doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+    doc.setFont("Roboto", "normal");
+  }
 
-      for (let i = 0; i < 6; i++) {
-        const question = document.querySelectorAll(".question-block")[i].querySelector(".question").innerText;
-        const selected = document.querySelector(`input[name="q${i}"]:checked`);
-        if (!selected) continue;
-        const label = selected.parentElement.innerText;
-        total += parseInt(selected.value);
-        doc.text(`${i + 1}. ${question}`, 10, y); y += 6;
-        doc.text(`Antwort: ${label}`, 10, y); y += 10;
-        if (y > 270) { doc.addPage(); y = 20; }
-      }
+  const lineHeight = 8;
+  const left = 15;
+  const right = 190;
+  let y = 20;
 
-      doc.setFontSize(14);
-      doc.text(`Gesamtscore: ${total} / 24`, 10, y);
-      doc.save("FOG_Auswertung.pdf");
+  doc.setFontSize(16);
+  doc.text("FOG-Q – Freezing of Gait Questionnaire", left, y);
+  y += lineHeight;
+
+  doc.setFontSize(12);
+  doc.line(left, y, right, y); y += 5;
+
+  for (let i = 0; i < 6; i++) {
+    const questionEl = document.querySelectorAll(".question-block")[i];
+    const questionText = questionEl.querySelector(".question").innerText;
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    if (!selected) continue;
+
+    const answerText = selected.parentElement.innerText.trim();
+
+    const wrapped = doc.splitTextToSize(`${i + 1}. ${questionText}`, 160);
+    wrapped.forEach((line, idx) => {
+      doc.text(line, left, y);
+      if (idx === 0) doc.text(answerText, right, y, { align: "right" });
+      y += lineHeight;
+    });
+    y += 2;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
+  }
+
+  // Gesamtscore übernehmen aus bereits berechneter Anzeige
+  const scoreText = document.getElementById("result").innerText;
+  if (scoreText) {
+    y += 5;
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(13);
+    doc.text("Gesamtergebnis:", left, y); y += lineHeight;
+    doc.setFont(undefined, "normal");
+    doc.setFontSize(12);
+    doc.text(scoreText, left, y); y += lineHeight;
+  }
+
+  const today = new Date().toLocaleDateString("de-CH");
+  y += 5;
+  doc.text(`Datum: ${today}`, left, y);
+
+  doc.save("FOGQ_Auswertung.pdf");
+}
+
   </script>
 </body>
 </html>
