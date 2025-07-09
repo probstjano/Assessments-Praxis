@@ -205,10 +205,10 @@
       const BORG = document.getElementById("BORG").value;
       const BORGD = document.getElementById("BORGD").value;
       doc.text(`Wiederholungen: ${reps}`, 10, 30);
-      doc.text(`Herzfrequenz vor Test: ${HFvor}`, 10, 38);
-      doc.text(`Herzfrequenz nach Test: ${HFnach}`, 10, 46);
-      doc.text(`SPO2 vor Test: ${SPO2vor}`, 10, 54);
-      doc.text(`SPO2 nach Test: ${SPO2nach}`, 10, 62);
+      doc.text(`Herzfrequenz vor Test: ${HFvor} bpm`, 10, 38);
+      doc.text(`Herzfrequenz nach Test: ${HFnach} bpm`, 10, 46);
+      doc.text(`SPO2 vor Test: ${SPO2vor}`% , 10, 54);
+      doc.text(`SPO2 nach Test: ${SPO2nach} %`, 10, 62);
       doc.text(`BORG Anstrengung: ${BORG}/10`, 10, 70);
       doc.text(`BORG Dyspnoe: ${BORGD}/10`, 10, 78);
       window.open(doc.output("bloburl"), "_blank");
