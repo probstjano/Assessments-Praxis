@@ -1,26 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>2-Minuten Step Test</title>
+  <title>DEMMI – De Morton Mobility Index</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="robotoBase64.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 2rem; font-size: 16px; max-width: 700px; }
-    label { display: block; margin-top: 1rem; }
-    input, select { width: 100%; padding: 6px; font-size: 16px; margin-bottom: 10px; }
-    button { margin-top: 10px; padding: 10px 15px; font-size: 16px; }
-    #result, #normwerte { font-weight: bold; margin-top: 20px; white-space: pre-line; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    th { background: #f0f0f0; }
-    .hidden { display: none; }
-    .nav-buttons { margin-top: 2rem; }
+    body { font-family: sans-serif; margin: 10px; font-size: 16px; max-width: 600px; }
+    label { display: block; margin: 10px 0 5px; }
+    select {
+      width: 100%;
+      padding: 6px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+    #result { font-weight: bold; margin-top: 20px; }
+    .nav-buttons { margin-top: 30px; }
     .nav-buttons a {
-      display: inline-block; margin-right: 10px; padding: 10px 15px;
-      background: #eee; border-radius: 8px; text-decoration: none; color: #000;
+      display: inline-block;
+      margin-right: 10px;
+      padding: 10px 15px;
+      background: #eee;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #000;
     }
     .nav-buttons a:hover { background: #ddd; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -125,22 +133,27 @@
     normDiv.classList.remove("hidden");
   }
 
+<script>
   async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    let y = 20;
+
+    // ✅ Roboto einbinden
+    doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+    doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+    doc.setFont("Roboto", "normal");
+
     const lineHeight = 8;
-    const left = 10;
-    const labelWidth = 60;
+    const left = 15;
+    const right = 190;
+    let y = 20;
 
     doc.setFontSize(16);
     doc.text("2-Minuten Step Test – Auswertung", left, y);
     y += lineHeight;
 
     doc.setFontSize(12);
-    doc.line(left, y, 200, y); y += 5;
+    doc.line(left, y, right, y); y += 5;
 
     const inputs = [
       ['Anzahl Schritte', 'steps', ''],
@@ -157,16 +170,16 @@
       let val = document.getElementById(id).value || "-";
       if (id === "sex") val = val === "men" ? "Männlich" : "Weiblich";
       doc.text(`${label}:`, left, y);
-      doc.text(`${val} ${unit}`, left + labelWidth, y);
+      doc.text(`${val} ${unit}`, left + 60, y);
       y += lineHeight;
     }
 
-    y += 5;
-    doc.line(left, y, 200, y);
-    y += lineHeight;
-
     const today = new Date().toLocaleDateString("de-CH");
-    doc.text(`Datum: ${today}`, 150, y + 5);
+    y += 5;
+    doc.line(left, y, right, y);
+    y += lineHeight;
+    doc.text(`Datum: ${today}`, left, y);
+
     doc.save("2MST_Formular.pdf");
   }
 </script>
