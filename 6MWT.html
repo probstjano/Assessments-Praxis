@@ -80,6 +80,105 @@
   <div id="result"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+  // 2D-Normwerte [Alter][Körpergröße] → Medianwerte
+  const normValues = {
+    40: { 150: 513, 160: 520, 170: 528, 180: 536, 190: 543 },
+    50: { 150: 504, 160: 511, 170: 519, 180: 527, 190: 534 },
+    60: { 150: 494, 160: 501, 170: 509, 180: 517, 190: 524 },
+    70: { 150: 484, 160: 491, 170: 499, 180: 507, 190: 514 },
+    80: { 150: 474, 160: 481, 170: 489, 180: 497, 190: 504 }
+  };
+
+  function calculateInterpolated(age, height) {
+    const ages = Object.keys(normValues).map(Number);
+    const heights = Object.keys(normValues[ages[0]]).map(Number);
+
+    if (age < ages[0] || age > ages[ages.length - 1] || height < heights[0] || height > heights[heights.length - 1]) {
+      return null;
+    }
+
+    // Find surrounding age values
+    let a0 = ages[0], a1 = ages[ages.length - 1];
+    for (let i = 0; i < ages.length - 1; i++) {
+      if (age >= ages[i] && age <= ages[i + 1]) {
+        a0 = ages[i];
+        a1 = ages[i + 1];
+        break;
+      }
+    }
+
+    // Find surrounding height values
+    let h0 = heights[0], h1 = heights[heights.length - 1];
+    for (let i = 0; i < heights.length - 1; i++) {
+      if (height >= heights[i] && height <= heights[i + 1]) {
+        h0 = heights[i];
+        h1 = heights[i + 1];
+        break;
+      }
+    }
+
+    // Bilineare Interpolation
+    const Q11 = normValues[a0][h0];
+    const Q21 = normValues[a1][h0];
+    const Q12 = normValues[a0][h1];
+    const Q22 = normValues[a1][h1];
+
+    const interpolated =
+      1 / ((a1 - a0) * (h1 - h0)) *
+      (
+        Q11 * (a1 - age) * (h1 - height) +
+        Q21 * (age - a0) * (h1 - height) +
+        Q12 * (a1 - age) * (height - h0) +
+        Q22 * (age - a0) * (height - h0)
+      );
+
+    return Math.round(interpolated);
+  }
+
+  function calculateNorm() {
+    const distance = parseFloat(document.getElementById("distance").value);
+    const age = parseInt(document.getElementById("age").value);
+    const height = parseInt(document.getElementById("height").value);
+    const result = document.getElementById("result");
+
+    if (isNaN(distance) || isNaN(age) || isNaN(height)) {
+      result.innerText = "Bitte alle Felder ausfüllen (Distanz, Alter, Größe).";
+      return;
+    }
+
+    const predicted = calculateInterpolated(age, height);
+
+    if (!predicted) {
+      result.innerText = `⚠️ Für diese Werte stehen keine Normdaten zur Verfügung (nur 40–80 Jahre, 150–190 cm).`;
+      return;
+    }
+
+    let level = "-";
+    const thresholds = [
+      predicted * 0.60, // ca. 2.5. Perzentil
+      predicted * 0.75, // ca. 25. Perzentil
+      predicted * 1.00, // 50.
+      predicted * 1.15, // 75.
+      predicted * 1.30  // 97.5.
+    ];
+    const percentiles = [2.5, 25, 50, 75, 97.5];
+
+    for (let i = 0; i < thresholds.length; i++) {
+      if (distance <= thresholds[i]) {
+        level = percentiles[i];
+        break;
+      }
+    }
+    if (distance > thresholds[thresholds.length - 1]) level = ">97.5";
+
+    result.innerText =
+      `Referenzwert (50. Perzentil): ${predicted} m\n` +
+      `Diese Leistung entspricht etwa dem ${level}. Perzentil.\n` +
+      `→ Diese Distanz ist besser als ca. ${level}% der Vergleichsgruppe.`;
+  }
+</script>
   <script>
   async function generatePDF() {
     const { jsPDF } = window.jspdf;
