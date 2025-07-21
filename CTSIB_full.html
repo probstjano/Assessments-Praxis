@@ -40,12 +40,12 @@
 
   <script>
     const labels = [
-      "1) Stand on firm surface, eyes open",
-      "2) Stand on firm surface, eyes closed",
-      "3) Stand on firm surface, visual conflict dome",
-      "4) Stand on foam surface, eyes open",
-      "5) Stand on foam surface, eyes closed",
-      "6) Stand on foam surface, visual conflict dome"
+      "1) Fester Untergrund, Augen offen",
+      "2) Fester Untergrund, Augen geschlossen",
+      "3) Fester Untergrund, Lampenschirm",
+      "4) Foam-Pad, Augen offen",
+      "5) Foam-Pad, Augen geschlossen",
+      "6) Foam-Pad, Lampenschirm"
     ];
 
     const interpretationMatrix = {
@@ -105,7 +105,6 @@
 
       document.getElementById("result").innerText =
         `Gesamte Standzeit: ${totalTime} Sekunden\n` +
-        `Schwankungscode: ${swayCode}\n` +
         `Interpretation: ${interpretation}`;
     }
   </script>
