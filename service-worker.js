@@ -1,4 +1,4 @@
-const CACHE_NAME = 'assessment-praxis-v6';
+const CACHE_NAME = 'assessment-praxis-v7';
 const ASSETS_TO_CACHE = [
   '30s_assissted.html',
   '6MWT.html',
@@ -36,6 +36,8 @@ const ASSETS_TO_CACHE = [
   'DGI.html',
   'DHI.html',
   'Braincheck.html',
+  'CTSIB_full.html',
+  
   
 ];
 
