@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CTSIB – Clinical Test of Sensory Interaction in Balance</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; font-size: 16px; max-width: 800px; }
+    h1 { margin-bottom: 10px; }
+    label { font-weight: bold; }
+    .block { margin-bottom: 20px; }
+    input[type="number"], select {
+      padding: 6px;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    #result {
+      margin-top: 30px;
+      font-weight: bold;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>CTSIB – Clinical Test of Sensory Interaction in Balance</h1>
+  <p>Bitte für jede der 6 Bedingungen die Standzeit (in Sekunden, max. 30) und den Grad der Schwankung angeben.</p>
+
+  <form id="ctsibForm">
+    <div id="conditions"></div>
+    <button type="button" onclick="calculateCTSIB()">✅ Auswertung anzeigen</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const labels = [
+      "1) Stand on firm surface, eyes open",
+      "2) Stand on firm surface, eyes closed",
+      "3) Stand on firm surface, visual conflict dome",
+      "4) Stand on foam surface, eyes open",
+      "5) Stand on foam surface, eyes closed",
+      "6) Stand on foam surface, visual conflict dome"
+    ];
+
+    const interpretationMatrix = {
+      "NNNNAA": "vestibulärer Ausfall",
+      "NNANNA": "visuelle Abhängigkeit",
+      "NNANAA": "visuelle Abhängigkeit",
+      "NAANNA": "visuelle Abhängigkeit",
+      "NAANAA": "visuelle Abhängigkeit",
+      "NNNAAA": "somatosensorische Abhängigkeit",
+      "NNAAAA": "sensorisches Selektionsproblem"
+    };
+
+    const container = document.getElementById("conditions");
+
+    labels.forEach((text, i) => {
+      const div = document.createElement("div");
+      div.className = "block";
+      div.innerHTML = `
+        <label>${text}</label><br>
+        Zeit (Sek., max. 30): <input type="number" id="time${i}" min="0" max="30" /><br>
+        Schwankung:
+        <select id="sway${i}">
+          <option value="">-- auswählen --</option>
+          <option value="1">1 – minimales Schwanken</option>
+          <option value="2">2 – leichtes Schwanken</option>
+          <option value="3">3 – bedeutendes Schwanken</option>
+          <option value="4">4 – Schritt / Festhalten</option>
+        </select>
+      `;
+      container.appendChild(div);
+    });
+
+    function calculateCTSIB() {
+      let totalTime = 0;
+      let swayCode = "";
+      let error = false;
+
+      for (let i = 0; i < 6; i++) {
+        const time = parseInt(document.getElementById(`time${i}`).value);
+        const sway = parseInt(document.getElementById(`sway${i}`).value);
+
+        if (isNaN(time) || isNaN(sway)) {
+          error = true;
+          break;
+        }
+
+        totalTime += time;
+        swayCode += (sway <= 2 ? "N" : "A");
+      }
+
+      if (error) {
+        document.getElementById("result").innerText = "Bitte alle Felder korrekt ausfüllen.";
+        return;
+      }
+
+      const interpretation = interpretationMatrix[swayCode] || "Unauffällig / Keine eindeutige Interpretation";
+
+      document.getElementById("result").innerText =
+        `Gesamte Standzeit: ${totalTime} Sekunden\n` +
+        `Schwankungscode: ${swayCode}\n` +
+        `Interpretation: ${interpretation}`;
+    }
+  </script>
+
+  <p><a href="index.html">⬅️ Zurück zur Hauptseite</a></p>
+</body>
+</html>
