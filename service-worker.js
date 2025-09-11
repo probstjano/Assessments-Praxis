@@ -1,4 +1,4 @@
-const CACHE_NAME = 'assessment-praxis-v7.3';
+const CACHE_NAME = 'assessment-praxis-v7.4'; // 🔄 Version hochzählen bei Updates
 const ASSETS_TO_CACHE = [
   '30s_assissted.html',
   '6MWT.html',
@@ -19,6 +19,12 @@ const ASSETS_TO_CACHE = [
   'TUG.html',
   'Trunk Impairment Scale.html',
   'tinetti.html',
+  'MiniBEST.html',
+  'DGI.html',
+  'DHI.html',
+  'Braincheck.html',
+  'CTSIB_full.html',
+  'PRTEE.html',
   'BBS_Protokoll.pdf',
   'DEMMI_Protokoll.pdf',
   'FES_I_Deutsch.pdf',
@@ -29,43 +35,49 @@ const ASSETS_TO_CACHE = [
   'SPPB_Protokoll.pdf',
   '6MWT_Protokoll.pdf',
   'MniBEST_Protokoll.pdf',
-  'MiniBEST.html',
   'icon.png',
   'manifest.json',
-  'index.html',
-  'DGI.html',
-  'DHI.html',
-  'Braincheck.html',
-  'CTSIB_full.html',
-  'PRTEE.html',
-  
-  
-  
+  'index.html'
 ];
 
-// Neue Version sofort aktiv
+// Install → Cache aufbauen
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // ⚡ aktiviert sofort
+  self.skipWaiting(); // Neue Version sofort aktiv
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
 });
 
-// Alte Caches löschen + Kontrolle übernehmen
+// Activate → Alte Caches löschen
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   );
-  self.clients.claim(); // ⚡ sofort übernehmen
+  self.clients.claim(); // Kontrolle übernehmen
 });
 
-// Netzwerkabfragen: zuerst Cache, dann Netzwerk
+// Fetch → Hybrid-Strategie
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => response || fetch(event.request))
-  );
+  const url = event.request.url;
+
+  // HTML-Seiten → Netzwerk first
+  if (event.request.mode === 'navigate' || url.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Kopie im Cache speichern
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request)) // Offline: Cache fallback
+    );
+  } else {
+    // Alles andere → Cache first
+    event.respondWith(
+      caches.match(event.request).then((response) => response || fetch(event.request))
+    );
+  }
 });
