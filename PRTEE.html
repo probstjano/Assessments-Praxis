@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PRTEE – Patient-Rated Tennis Elbow Evaluation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="robotoBase64.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 20px; font-size: 16px; max-width: 900px; }
+    h1 { margin-bottom: 10px; }
+    .section { margin-bottom: 30px; }
+    .question-block { margin-bottom: 20px; }
+    .options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .options label { display: flex; flex-direction: column; align-items: center; font-size: 14px; }
+    .options input { margin-bottom: 4px; }
+    button { padding: 10px 15px; font-size: 16px; margin-top: 20px; }
+    #result { margin-top: 30px; font-weight: bold; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <h1>PRTEE – Patient-Rated Tennis Elbow Evaluation</h1>
+  <p>Bitte alle Fragen beantworten (0 = keine Schmerzen / keine Schwierigkeiten, 10 = stärkste Schmerzen / extrem schwierig).</p>
+
+  <form id="prteeForm">
+    <div class="section">
+      <h2>Schmerzskala</h2>
+      <div id="painQuestions"></div>
+    </div>
+
+    <div class="section">
+      <h2>Funktion im Alltag</h2>
+      <div id="dailyQuestions"></div>
+    </div>
+
+    <div class="section">
+      <h2>Funktion bei speziellen Tätigkeiten</h2>
+      <div id="activityQuestions"></div>
+    </div>
+
+    <button type="button" onclick="calculatePRTEE()">✅ Score berechnen</button>
+    <button type="button" onclick="generatePDF()">📄 Als PDF speichern</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const painItems = [
+      "Schmerz in Ruhe",
+      "Schmerz bei leichtem Druck",
+      "Schmerz beim Anheben eines Bechers",
+      "Schmerz beim Tragen einer Einkaufstasche",
+      "Schmerz beim Heben schwerer Gegenstände"
+    ];
+
+    const dailyItems = [
+      "Haar kämmen",
+      "Zähne putzen",
+      "Tür öffnen",
+      "Essen mit Gabel oder Löffel",
+      "Tasse aus Schrank nehmen"
+    ];
+
+    const activityItems = [
+      "Schreiben",
+      "Drehen eines Schlüssels",
+      "Drehen eines Schraubenziehers",
+      "Heben einer vollen Pfanne",
+      "Tragen einer Einkaufstasche"
+    ];
+
+    function renderQuestions(containerId, items, prefix) {
+      const container = document.getElementById(containerId);
+      items.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question-block";
+        let optionsHTML = "";
+        for (let v = 0; v <= 10; v++) {
+          optionsHTML += `
+            <label>
+              <input type="radio" name="${prefix}${i}" value="${v}">${v}
+            </label>`;
+        }
+        div.innerHTML = `<div><strong>${q}</strong></div><div class="options">${optionsHTML}</div>`;
+        container.appendChild(div);
+      });
+    }
+
+    renderQuestions("painQuestions", painItems, "p");
+    renderQuestions("dailyQuestions", dailyItems, "d");
+    renderQuestions("activityQuestions", activityItems, "a");
+
+    function calculatePRTEE() {
+      let pain = 0, daily = 0, activity = 0;
+
+      for (let i = 0; i < painItems.length; i++) {
+        const val = document.querySelector(`input[name="p${i}"]:checked`);
+        if (!val) return alert("Bitte alle Schmerzfragen beantworten.");
+        pain += parseInt(val.value);
+      }
+
+      for (let i = 0; i < dailyItems.length; i++) {
+        const val = document.querySelector(`input[name="d${i}"]:checked`);
+        if (!val) return alert("Bitte alle Alltagsfragen beantworten.");
+        daily += parseInt(val.value);
+      }
+
+      for (let i = 0; i < activityItems.length; i++) {
+        const val = document.querySelector(`input[name="a${i}"]:checked`);
+        if (!val) return alert("Bitte alle Tätigkeitsfragen beantworten.");
+        activity += parseInt(val.value);
+      }
+
+      const functionScore = (daily + activity) / 2;
+      const total = pain + functionScore;
+
+      prteeScores = { pain, daily, activity, functionScore, total };
+
+      document.getElementById("result").innerText =
+        `Schmerz: ${pain} / 50\n` +
+        `Funktion im Alltag: ${daily} / 50\n` +
+        `Funktion bei Tätigkeiten: ${activity} / 50\n` +
+        `Funktion gesamt (Ø Alltag + Tätigkeit): ${functionScore.toFixed(1)} / 50\n` +
+        `Gesamt: ${total.toFixed(1)} / 100`;
+    }
+
+    async function generatePDF() {
+      if (!prteeScores) {
+        alert("Bitte zuerst Score berechnen.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.addFileToVFS("Roboto-Regular.ttf", window.robotoBase64);
+      doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+      doc.setFont("Roboto", "normal");
+
+      const left = 15;
+      const right = 190;
+      const lineHeight = 8;
+      let y = 20;
+
+      doc.setFontSize(16);
+      doc.text("PRTEE – Auswertung", left, y);
+      y += lineHeight;
+
+      doc.setFontSize(12);
+      doc.line(left, y, right, y);
+      y += 5;
+
+      function addSection(title, items, prefix) {
+        doc.setFontSize(13);
+        doc.text(title, left, y); 
+        y += lineHeight;
+
+        items.forEach((q, i) => {
+          const sel = document.querySelector(`input[name="${prefix}${i}"]:checked`);
+          const val = sel ? sel.value : "-";
+          const wrapped = doc.splitTextToSize(`${i+1}. ${q}`, 160);
+          wrapped.forEach((line, idx) => {
+            doc.text(line, left, y);
+            if (idx === 0) {
+              doc.text(val.toString(), right, y, { align: "right" });
+            }
+            y += lineHeight;
+          });
+          y += 2;
+          if (y > 270) { doc.addPage(); y = 20; }
+        });
+        y += 5;
+      }
+
+      addSection("Schmerz", painItems, "p");
+      addSection("Funktion im Alltag", dailyItems, "d");
+      addSection("Funktion bei Tätigkeiten", activityItems, "a");
+
+      doc.setFontSize(14);
+      doc.text("Gesamtergebnis:", left, y); y += lineHeight;
+      doc.setFontSize(12);
+      doc.text(`Schmerz: ${prteeScores.pain} / 50`, left, y); y += lineHeight;
+      doc.text(`Funktion (Ø Alltag + Tätigkeit): ${prteeScores.functionScore.toFixed(1)} / 50`, left, y); y += lineHeight;
+      doc.text(`Gesamt: ${prteeScores.total.toFixed(1)} / 100`, left, y); y += lineHeight;
+
+      const today = new Date().toLocaleDateString("de-CH");
+      y += 5;
+      doc.text(`Datum: ${today}`, left, y);
+
+      doc.save("PRTEE_Auswertung.pdf");
+    }
+  </script>
+
+  <p><a href="index.html">⬅️ Zurück zur Hauptseite</a></p>
+</body>
+</html>
