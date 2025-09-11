@@ -1,4 +1,4 @@
-const CACHE_NAME = 'assessment-praxis-v7.1';
+const CACHE_NAME = 'assessment-praxis-v7.2';
 const ASSETS_TO_CACHE = [
   '30s_assissted.html',
   '6MWT.html',
