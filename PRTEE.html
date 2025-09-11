@@ -32,7 +32,7 @@
     </div>
 
     <div class="section">
-      <h2> ausgewählte Tätigkeiten </h2>
+      <h2> Ausgewählte Tätigkeiten </h2>
       <p> Bewerten Sie die durschnittlichen Schwierigkeiten bei den unten genannten alltäglichen Tätigkeiten während der letzten Woche und kreuzen Sie die enstprechende Zahl an. Mit alltäglichen Tätigkeiten sind Aktivitäten gemeint, welche Sie schon früher, das heißt schon vor dem Armproblem, durchgeführt hatten. 
         0 bedeutet, dass Sie keine Probleme damit hatten, 10 bedeutet, dass es unmöglich war, diese Tätigkeit auszuführen. (0=keine Schwierigkeiten, 10=unmöglich) </p>
       <div id="dailyQuestions"></div>
@@ -98,39 +98,48 @@
     renderQuestions("activityQuestions", activityItems, "a");
 
     function calculatePRTEE() {
-      let pain = 0, daily = 0, activity = 0;
+  let pain = 0, daily = 0, activity = 0;
 
-      for (let i = 0; i < painItems.length; i++) {
-        const val = document.querySelector(`input[name="p${i}"]:checked`);
-        if (!val) return alert("Bitte alle Schmerzfragen beantworten.");
-        pain += parseInt(val.value);
+  // Hilfsfunktion: Kategorie berechnen mit Imputation
+  function calcCategory(items, prefix) {
+    let sum = 0, count = 0;
+    items.forEach((_, i) => {
+      const val = document.querySelector(`input[name="${prefix}${i}"]:checked`);
+      if (val) {
+        sum += parseInt(val.value);
+        count++;
       }
+    });
+    if (count === 0) return null; // Kategorie komplett unbeantwortet
+    const mean = sum / count;
+    return sum + (items.length - count) * mean; // fehlende ersetzt durch Mittelwert
+  }
 
-      for (let i = 0; i < dailyItems.length; i++) {
-        const val = document.querySelector(`input[name="d${i}"]:checked`);
-        if (!val) return alert("Bitte alle Alltagsfragen beantworten.");
-        daily += parseInt(val.value);
-      }
+  const painScore = calcCategory(painItems, "p");
+  const dailyScore = calcCategory(dailyItems, "d");
+  const activityScore = calcCategory(activityItems, "a");
 
-      for (let i = 0; i < activityItems.length; i++) {
-        const val = document.querySelector(`input[name="a${i}"]:checked`);
-        if (!val) return alert("Bitte alle Tätigkeitsfragen beantworten.");
-        activity += parseInt(val.value);
-      }
+  if (painScore === null || dailyScore === null || activityScore === null) {
+    alert("Mindestens eine Kategorie wurde komplett nicht beantwortet. Bitte korrigieren.");
+    return;
+  }
 
-      const functionScore = (daily + activity) / 2;
-      const total = pain + functionScore;
+  const functionScore = (dailyScore + activityScore) / 2;
+  const total = painScore + functionScore;
 
-      prteeScores = { pain, daily, activity, functionScore, total };
+  prteeScores = { 
+    pain: painScore, 
+    daily: dailyScore, 
+    activity: activityScore, 
+    functionScore, 
+    total 
+  };
 
-      document.getElementById("result").innerText =
-        `Schmerz: ${pain} / 50\n` +
-        `Funktion im Alltag: ${daily} / 50\n` +
-        `Funktion bei Tätigkeiten: ${activity} / 50\n` +
-        `Funktion gesamt (Ø Alltag + Tätigkeit): ${functionScore.toFixed(1)} / 50\n` +
-        `Gesamt: ${total.toFixed(1)} / 100`;
-    }
-
+  document.getElementById("result").innerText =
+    `Schmerz-Score: ${painScore.toFixed(1)} / 50\n` +
+    `Funktion gesamt: ${functionScore.toFixed(1)} / 50\n` +
+    `Gesamt: ${total.toFixed(1)} / 100`;
+}
     async function generatePDF() {
       if (!prteeScores) {
         alert("Bitte zuerst Score berechnen.");
