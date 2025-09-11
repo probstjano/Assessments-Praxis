@@ -37,6 +37,8 @@ const ASSETS_TO_CACHE = [
   'DHI.html',
   'Braincheck.html',
   'CTSIB_full.html',
+  'PRTEE.html',
+  
   
   
 ];
