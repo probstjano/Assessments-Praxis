@@ -244,47 +244,36 @@
     }
   </script>
 
-  <!-- Wechsel-Button unten rechts -->
-<a href="index_flying.html" class="switch-btn">
-  <img src="flying.png" alt="Praxis" class="switch-icon">
-  <span>Zu Flying Bereich wechseln</span>
-</a>
+<!-- Wechsel-Button unten rechts -->
+<a href="index_flying.html" class="switch-btn">🏠 Zum Flying Bereich wechseln</a>
 
 <style>
 .switch-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #fff;
+  bottom: 25px;
+  right: 25px;
+  background-color: #ffffff;
+  color: #000;
+  border: 1px solid #ddd;
   border-radius: 50px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  padding: 8px 14px;
-  text-decoration: none;
-  color: #333;
+  padding: 14px 22px;
+  font-size: 1rem;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transition: all 0.25s ease;
   z-index: 9999;
 }
 .switch-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-.switch-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.25);
 }
 @media (max-width: 700px) {
   .switch-btn {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-  }
-  .switch-icon {
-    width: 22px;
-    height: 22px;
+    font-size: 0.95rem;
+    padding: 16px 24px;
+    bottom: 20px;
+    right: 20px;
   }
 }
 </style>
