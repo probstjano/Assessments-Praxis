@@ -114,6 +114,56 @@
       }
     }
 
+    .exhaustion-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.exhaustion-grid > div {
+  padding: .7rem;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.exhaustion-grid > div:nth-child(5n) {
+  border-right: none;
+}
+
+.exhaustion-header {
+  background: #f0f0f0;
+  font-weight: 700;
+  text-align: center;
+  font-size: 13px;
+}
+
+.exhaustion-question {
+  font-weight: 600;
+}
+
+.exhaustion-cell {
+  text-align: center;
+}
+
+.exhaustion-cell input {
+  transform: scale(1.25);
+}
+
+@media (max-width: 700px) {
+  .exhaustion-grid {
+    grid-template-columns: 1.3fr repeat(4, .7fr);
+    font-size: 13px;
+  }
+
+  .exhaustion-grid > div {
+    padding: .5rem;
+  }
+}
+
     label {
       display: block;
       font-weight: 600;
@@ -719,27 +769,31 @@ Dynamischer Gang: 0 / 10</div>
       });
     }
 
-    function renderExhaustion() {
-      const container = document.getElementById("exhaustionContainer");
-      container.innerHTML = "";
+   function renderExhaustion() {
+  const container = document.getElementById("exhaustionContainer");
 
-      exhaustionItems.forEach((text, index) => {
-        const q = index + 1;
-        container.innerHTML += `
-          <div class="question-block">
-            <div class="question-title">${q}. ${text}</div>
-            <div class="radio-row">
-              ${exhaustionOptions.map(option => `
-                <label>
-                  <input type="radio" name="exhaustion${q}" value="${option.value}">
-                  ${option.label}
-                </label>
-              `).join("")}
-            </div>
-          </div>
-        `;
-      });
-    }
+  container.innerHTML = `
+    <div class="exhaustion-grid">
+      <div class="exhaustion-header">Während der letzten zwei Wochen...</div>
+      <div class="exhaustion-header">selten oder überhaupt nicht<br><span class="muted">weniger als 1 Tag</span></div>
+      <div class="exhaustion-header">manchmal<br><span class="muted">1 bis 2 Tage</span></div>
+      <div class="exhaustion-header">öfters<br><span class="muted">3 bis 4 Tage</span></div>
+      <div class="exhaustion-header">meistens / ganze Zeit<br><span class="muted">5 bis 7 Tage</span></div>
+
+      <div class="exhaustion-question">War alles anstrengend für mich.</div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="0"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="1"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="2"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="3"></div>
+
+      <div class="exhaustion-question">Konnte ich mich zu nichts aufraffen.</div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="0"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="1"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="2"></div>
+      <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="3"></div>
+    </div>
+  `;
+}
 
     function renderMiniBest() {
       const container = document.getElementById("miniBestContainer");
