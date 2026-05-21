@@ -470,33 +470,47 @@
     <h2>3. Testung vor Ort</h2>
     <p class="muted">Die Werte werden durch die Therapeut:in eingetragen. Die Stoppuhr oben rechts kann für Gehgeschwindigkeit und 5x Sit-Stand verwendet werden.</p>
 
-    <div class="test-card">
-      <div class="test-title">Gehgeschwindigkeit</div>
+  <div class="test-card">
+  <div class="test-title">Gehgeschwindigkeit</div>
 
-      <div class="form-grid three">
-        <div>
-          <label for="gaitDistance">Strecke</label>
-          <select id="gaitDistance">
-            <option value="4">4 m</option>
-            <option value="6">6 m</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="gaitTime">Zeit in Sekunden</label>
-          <input type="number" id="gaitTime" min="0" step="0.01" placeholder="z. B. 5.20">
-        </div>
-
-        <div>
-          <label for="gaitSpeed">Gehgeschwindigkeit m/s</label>
-          <input type="text" id="gaitSpeed" readonly placeholder="automatisch">
-        </div>
-      </div>
-
-      <div class="timer-actions">
-        <button type="button" onclick="useStopwatchFor('gaitTime')">Stoppuhr-Zeit für Gehgeschwindigkeit übernehmen</button>
-      </div>
+  <div class="form-grid three">
+    <div>
+      <label for="gaitDistance">Strecke</label>
+      <select id="gaitDistance">
+        <option value="4">4 m</option>
+        <option value="6">6 m</option>
+      </select>
     </div>
+
+    <div>
+      <label for="gaitTime1">Trial 1: Zeit in Sekunden</label>
+      <input type="number" id="gaitTime1" min="0" step="0.01" placeholder="z. B. 5.20">
+      <button type="button" onclick="useStopwatchFor('gaitTime1')">
+        Stoppuhr übernehmen
+      </button>
+    </div>
+
+    <div>
+      <label for="gaitTime2">Trial 2: Zeit in Sekunden</label>
+      <input type="number" id="gaitTime2" min="0" step="0.01" placeholder="z. B. 4.90">
+      <button type="button" onclick="useStopwatchFor('gaitTime2')">
+        Stoppuhr übernehmen
+      </button>
+    </div>
+  </div>
+
+  <div class="form-grid two" style="margin-top: 1rem;">
+    <div>
+      <label for="gaitBestTime">Schnellere Zeit</label>
+      <input type="text" id="gaitBestTime" readonly placeholder="automatisch">
+    </div>
+
+    <div>
+      <label for="gaitSpeed">Gehgeschwindigkeit m/s</label>
+      <input type="text" id="gaitSpeed" readonly placeholder="automatisch">
+    </div>
+  </div>
+</div>
 
     <div class="test-card">
       <div class="test-title">5x Sit-Stand</div>
@@ -861,8 +875,9 @@ function renderGDS() {
     }
 
     function setupAutoCalculations() {
-      document.getElementById("gaitTime").addEventListener("input", calculateGaitSpeed);
-      document.getElementById("gaitDistance").addEventListener("change", calculateGaitSpeed);
+document.getElementById("gaitTime1").addEventListener("input", calculateGaitSpeed);
+document.getElementById("gaitTime2").addEventListener("input", calculateGaitSpeed);
+document.getElementById("gaitDistance").addEventListener("change", calculateGaitSpeed);
     }
 
     function updatePage() {
@@ -950,18 +965,28 @@ function renderGDS() {
       if (inputId === "gaitTime") calculateGaitSpeed();
     }
 
-    function calculateGaitSpeed() {
-      const distance = Number(document.getElementById("gaitDistance").value);
-      const time = Number(document.getElementById("gaitTime").value);
-      const output = document.getElementById("gaitSpeed");
+function calculateGaitSpeed() {
+  const distance = Number(document.getElementById("gaitDistance").value);
+  const time1 = Number(document.getElementById("gaitTime1").value);
+  const time2 = Number(document.getElementById("gaitTime2").value);
 
-      if (!distance || !time) {
-        output.value = "";
-        return;
-      }
+  const bestTimeOutput = document.getElementById("gaitBestTime");
+  const speedOutput = document.getElementById("gaitSpeed");
 
-      output.value = (distance / time).toFixed(2);
-    }
+  const validTimes = [time1, time2].filter(t => !isNaN(t) && t > 0);
+
+  if (!distance || validTimes.length === 0) {
+    bestTimeOutput.value = "";
+    speedOutput.value = "";
+    return;
+  }
+
+  const bestTime = Math.min(...validTimes);
+  const speed = distance / bestTime;
+
+  bestTimeOutput.value = bestTime.toFixed(2);
+  speedOutput.value = speed.toFixed(2);
+}
 
     function calculateMiniBEST() {
       let total = 0;
@@ -1054,8 +1079,8 @@ function renderGDS() {
       const activeMinutes = inputValue("activeMinutes");
 
       const gaitDistance = inputValue("gaitDistance");
-      const gaitTime = inputValue("gaitTime");
-      const gaitSpeed = inputValue("gaitSpeed");
+  const gaitBestTime = inputValue("gaitBestTime");
+const gaitSpeed = inputValue("gaitSpeed");
 
       const sitStandTime = inputValue("sitStandTime");
       const sitStandNote = inputValue("sitStandNote");
