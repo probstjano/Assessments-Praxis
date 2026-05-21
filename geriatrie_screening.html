@@ -435,15 +435,35 @@
         </div>
       </div>
 
-      <div class="question-block">
-        <div class="question-title">Haben Sie Angst zu stürzen?</div>
-        <div class="radio-row">
-          <label><input type="radio" name="fearFall" value="Ja"> Ja</label>
-          <label><input type="radio" name="fearFall" value="Nein"> Nein</label>
-        </div>
-      </div>
+<div class="question-block">
+  <div class="question-title">Haben Sie Angst zu stürzen?</div>
+  <div class="radio-row">
+    <label><input type="radio" name="fearFall" value="Ja"> Ja</label>
+    <label><input type="radio" name="fearFall" value="Nein"> Nein</label>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Aufstehen vom Boden</h3>
+
+  <div class="question-block">
+    <div class="question-title">
+      Trauen Sie es sich zu, selbständig vom Boden aufzustehen?
     </div>
-  </section>
+
+    <div class="radio-row">
+      <label>
+        <input type="radio" name="floorConfidence" value="Ja">
+        Ja
+      </label>
+
+      <label>
+        <input type="radio" name="floorConfidence" value="Nein">
+        Nein
+      </label>
+    </div>
+  </div>
+</div>
 
   <!-- SEITE 3 -->
   <section class="page" id="page2">
@@ -1045,18 +1065,42 @@ Dynamischer Gang: 0 / 10</div>
           <strong>Zu nichts aufraffen:</strong> ${exhaustion.answers[1]}</p>
         </div>
 
-        <div class="report-section">
-          <h3>Körperliche Aktivität</h3>
-          <p><strong>Tage pro Woche:</strong> ${activeDays}<br>
-          <strong>Minuten pro aktivem Tag:</strong> ${activeMinutes}</p>
-        </div>
+<div class="report-section">
+  <h3>Körperliche Aktivität</h3>
 
-        <div class="report-section">
-          <h3>Sturzfragen</h3>
-          <p><strong>Sturz in den letzten 12 Monaten:</strong> ${radioValue("fall12m")}<br>
-          <strong>Unsicherheit beim Gehen oder Stehen:</strong> ${radioValue("unsteady")}<br>
-          <strong>Angst zu stürzen:</strong> ${radioValue("fearFall")}</p>
-        </div>
+  <p>
+    <strong>Tage pro Woche:</strong> ${activeDays}<br>
+
+    <strong>Minuten pro aktivem Tag:</strong>
+    ${activeMinutes}<br>
+
+    <strong>Total Minuten pro Woche:</strong>
+    ${
+      (!isNaN(Number(activeDays)) &&
+       !isNaN(Number(activeMinutes)))
+        ? Number(activeDays) * Number(activeMinutes)
+        : "nicht berechenbar"
+    }
+  </p>
+</div>
+
+       <div class="report-section">
+  <h3>Sturzfragen</h3>
+
+  <p>
+    <strong>Sturz in den letzten 12 Monaten:</strong>
+    ${radioValue("fall12m")}<br>
+
+    <strong>Unsicherheit beim Gehen oder Stehen:</strong>
+    ${radioValue("unsteady")}<br>
+
+    <strong>Angst zu stürzen:</strong>
+    ${radioValue("fearFall")}<br>
+
+    <strong>Traut sich selbständig vom Boden aufzustehen:</strong>
+    ${radioValue("floorConfidence")}
+  </p>
+</div>
 
         <div class="report-section">
           <h3>Vor-Ort-Testung</h3>
