@@ -771,23 +771,38 @@ Dynamischer Gang: 0 / 10</div>
       document.getElementById("screeningDate").value = new Date().toISOString().split("T")[0];
     }
 
-    function renderGDS() {
-      const container = document.getElementById("gdsContainer");
-      container.innerHTML = "";
+function renderGDS() {
+  const container = document.getElementById("gdsContainer");
+  container.innerHTML = "";
 
-      gdsItems.forEach((item, index) => {
-        const q = index + 1;
-        container.innerHTML += `
-          <div class="question-block">
-            <div class="question-title">${q}. ${item.text}</div>
-            <div class="radio-row">
-              <label><input type="radio" name="gds${q}" value="${item.yes}"> Ja [${item.yes}]</label>
-              <label><input type="radio" name="gds${q}" value="${item.no}"> Nein [${item.no}]</label>
-            </div>
-          </div>
-        `;
-      });
-    }
+  gdsItems.forEach((item, index) => {
+    const q = index + 1;
+
+    container.innerHTML += `
+      <div class="question-block">
+        <div class="question-title">
+          ${q}. ${item.text}
+        </div>
+
+        <div class="radio-row">
+          <label>
+            <input type="radio"
+                   name="gds${q}"
+                   value="${item.yes}">
+            Ja
+          </label>
+
+          <label>
+            <input type="radio"
+                   name="gds${q}"
+                   value="${item.no}">
+            Nein
+          </label>
+        </div>
+      </div>
+    `;
+  });
+}
 
    function renderExhaustion() {
   const container = document.getElementById("exhaustionContainer");
