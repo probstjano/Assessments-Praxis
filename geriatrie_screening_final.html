@@ -520,31 +520,31 @@
       </div>
     </div>
 
-    <div class="test-card">
-      <div class="test-title">Griffkraft dominante Hand</div>
+   <div class="test-card">
+  <div class="test-title">Griffkraft dominante Hand</div>
 
-      <div class="form-grid three">
-        <div>
-          <label for="gripTrial1">Trial 1 kg</label>
-          <input type="number" id="gripTrial1" min="0" step="0.1" placeholder="kg">
-        </div>
-
-        <div>
-          <label for="gripTrial2">Trial 2 kg</label>
-          <input type="number" id="gripTrial2" min="0" step="0.1" placeholder="kg">
-        </div>
-
-        <div>
-          <label for="gripTrial3">Trial 3 kg</label>
-          <input type="number" id="gripTrial3" min="0" step="0.1" placeholder="kg">
-        </div>
-      </div>
-
-      <div style="margin-top: 1rem;">
-        <label for="gripBest">Bester Wert kg</label>
-        <input type="text" id="gripBest" readonly placeholder="automatisch">
-      </div>
+  <div class="form-grid three">
+    <div>
+      <label for="gripTrial1">Trial 1 (N)</label>
+      <input type="number" id="gripTrial1" min="0" step="1" placeholder="Newton">
     </div>
+
+    <div>
+      <label for="gripTrial2">Trial 2 (N)</label>
+      <input type="number" id="gripTrial2" min="0" step="1" placeholder="Newton">
+    </div>
+
+    <div>
+      <label for="gripTrial3">Trial 3 (N)</label>
+      <input type="number" id="gripTrial3" min="0" step="1" placeholder="Newton">
+    </div>
+  </div>
+
+  <div style="margin-top: 1rem;">
+    <label for="gripBest">Bester Wert (kg)</label>
+    <input type="text" id="gripBest" readonly placeholder="automatisch">
+  </div>
+</div>
 
     <div class="test-card">
       <div class="test-title">Transfer Boden → Stand</div>
@@ -958,23 +958,25 @@ Dynamischer Gang: 0 / 10</div>
       speedOutput.value = speed.toFixed(2);
     }
 
-    function calculateGripBest() {
-      const values = [
-        Number(document.getElementById("gripTrial1").value),
-        Number(document.getElementById("gripTrial2").value),
-        Number(document.getElementById("gripTrial3").value)
-      ].filter(v => !isNaN(v) && v > 0);
+   function calculateGripBest() {
+  const valuesNewton = [
+    Number(document.getElementById("gripTrial1").value),
+    Number(document.getElementById("gripTrial2").value),
+    Number(document.getElementById("gripTrial3").value)
+  ].filter(v => !isNaN(v) && v > 0);
 
-      const output = document.getElementById("gripBest");
+  const output = document.getElementById("gripBest");
 
-      if (values.length === 0) {
-        output.value = "";
-        return;
-      }
+  if (valuesNewton.length === 0) {
+    output.value = "";
+    return;
+  }
 
-      output.value = Math.max(...values).toFixed(1);
-    }
+  const bestNewton = Math.max(...valuesNewton);
+  const bestKg = bestNewton / 9.81;
 
+  output.value = bestKg.toFixed(1);
+}
     function calculateMiniBEST() {
       let total = 0;
       let antizipatorisch = 0;
@@ -1141,11 +1143,11 @@ Dynamischer Gang: 0 / 10</div>
             <strong>5x Sit-Stand:</strong> ${sitStandTime} s<br>
             <strong>Bemerkung 5x Sit-Stand:</strong> ${sitStandNote}<br><br>
 
-            <strong>Griffkraft dominante Hand:</strong><br>
-            Trial 1: ${gripTrial1} kg<br>
-            Trial 2: ${gripTrial2} kg<br>
-            Trial 3: ${gripTrial3} kg<br>
-            Bester Wert: ${gripBest} kg
+          <strong>Griffkraft dominante Hand:</strong><br>
+Trial 1: ${gripTrial1} N (${!isNaN(Number(gripTrial1)) ? (Number(gripTrial1)/9.81).toFixed(1) : "-"} kg)<br>
+Trial 2: ${gripTrial2} N (${!isNaN(Number(gripTrial2)) ? (Number(gripTrial2)/9.81).toFixed(1) : "-"} kg)<br>
+Trial 3: ${gripTrial3} N (${!isNaN(Number(gripTrial3)) ? (Number(gripTrial3)/9.81).toFixed(1) : "-"} kg)<br>
+Bester Wert: ${gripBest} kg
           </p>
         </div>
 
