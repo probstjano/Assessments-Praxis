@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geriatrie Screening</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 1rem;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #111;
+      max-width: 980px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: .3rem;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 1.4rem;
+      margin-bottom: .6rem;
+    }
+
+    h3 {
+      font-size: 17px;
+      margin-top: 1.4rem;
+      margin-bottom: .5rem;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: .9rem;
+    }
+
+    .muted {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .stepper {
+      display: flex;
+      gap: .4rem;
+      margin: 1rem 0 1.4rem;
+      overflow-x: auto;
+    }
+
+    .step-pill {
+      padding: .45rem .7rem;
+      border-radius: 999px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .step-pill.active {
+      background: #d0eaff;
+      border-color: #8bbfe8;
+      font-weight: 700;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .card,
+    .question-block,
+    .test-card {
+      background: #f8f8f8;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .question-block {
+      background: #fff;
+    }
+
+    .question-title {
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 700px) {
+      .form-grid.two {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid.three {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .exhaustion-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .exhaustion-grid > div {
+      padding: .7rem;
+      border-bottom: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+    }
+
+    .exhaustion-grid > div:nth-child(5n) {
+      border-right: none;
+    }
+
+    .exhaustion-header {
+      background: #f0f0f0;
+      font-weight: 700;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .exhaustion-question {
+      font-weight: 600;
+    }
+
+    .exhaustion-cell {
+      text-align: center;
+    }
+
+    .exhaustion-cell input {
+      transform: scale(1.25);
+    }
+
+    @media (max-width: 700px) {
+      .exhaustion-grid {
+        grid-template-columns: 1.3fr repeat(4, .7fr);
+        font-size: 13px;
+      }
+
+      .exhaustion-grid > div {
+        padding: .5rem;
+      }
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: .25rem;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: .7rem;
+      font-size: 16px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .radio-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7rem 1.2rem;
+    }
+
+    .radio-row label {
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      margin: 0;
+    }
+
+    .radio-row input {
+      transform: scale(1.2);
+    }
+
+    .test-title {
+      font-weight: 700;
+      font-size: 17px;
+      margin-bottom: .6rem;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      background: #f0f0f0;
+    }
+
+    button.primary {
+      background: #d0eaff;
+      border-color: #8bbfe8;
+      font-weight: 700;
+    }
+
+    button.secondary {
+      background: #f0f0f0;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #ddd;
+    }
+
+    .nav-buttons .right {
+      margin-left: auto;
+      display: flex;
+      gap: .7rem;
+    }
+
+    .mini-result {
+      background: #eef7ff;
+      border: 1px solid #8bbfe8;
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: 700;
+      white-space: pre-line;
+    }
+
+    #reportBox {
+      background: #fff;
+      border: 1px solid #bbb;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .report-section {
+      margin-bottom: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .report-section:last-child {
+      border-bottom: none;
+    }
+
+    .report-section h3 {
+      margin-top: 0;
+      margin-bottom: .4rem;
+    }
+
+    #stopwatch {
+      display: none;
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: #fff;
+      border: 2px solid #444;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 9999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #stopwatch button {
+      margin-left: 4px;
+      padding: 3px 6px;
+      font-size: 12px;
+    }
+
+    .timer-actions {
+      margin-top: .8rem;
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    @media print {
+      .stepper,
+      .nav-buttons,
+      #stopwatch,
+      button {
+        display: none !important;
+      }
+
+      body {
+        margin: 0;
+        max-width: none;
+      }
+
+      .page {
+        display: none !important;
+      }
+
+      #page4 {
+        display: block !important;
+      }
+
+      #reportBox {
+        border: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Geriatrie Screening</h1>
+  <p class="muted">Mehrstufiges Screening mit Patient:innen-Fragen, Vor-Ort-Testung, Mini-BESTest und Abschlussreport.</p>
+
+  <div id="stopwatch">
+    <span id="swDisplay">00:00.0</span>
+    <button id="swMainBtn" onclick="swToggle()">▶</button>
+    <button onclick="swReset()">⟳</button>
+  </div>
+
+  <div class="stepper">
+    <div class="step-pill active">1 Angaben</div>
+    <div class="step-pill">2 Fragen</div>
+    <div class="step-pill">3 Testung</div>
+    <div class="step-pill">4 Mini-BESTest</div>
+    <div class="step-pill">5 Report</div>
+  </div>
+
+  <!-- SEITE 1 -->
+  <section class="page active" id="page0">
+    <h2>1. Angaben</h2>
+    <p>Diese Angaben werden von der Administration oder Therapeut:in eingetragen.</p>
+
+    <div class="card">
+      <div class="form-grid two">
+        <div>
+          <label for="firstName">Vorname</label>
+          <input type="text" id="firstName" autocomplete="given-name">
+        </div>
+
+        <div>
+          <label for="lastName">Nachname</label>
+          <input type="text" id="lastName" autocomplete="family-name">
+        </div>
+
+        <div>
+          <label for="birthDate">Geburtsdatum</label>
+          <input type="date" id="birthDate">
+        </div>
+
+        <div>
+          <label for="screeningDate">Datum Screening</label>
+          <input type="date" id="screeningDate">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEITE 2 -->
+  <section class="page" id="page1">
+    <h2>2. Patient:innen-Fragen</h2>
+
+    <div class="card">
+      <h3>GDS-4</h3>
+      <p class="muted">Kreuzen Sie die entsprechende Antwort an.</p>
+      <div id="gdsContainer"></div>
+    </div>
+
+    <div class="card">
+      <h3>Exhaustion</h3>
+      <p class="muted">Während der letzten zwei Wochen: Bitte geben Sie an, wie oft Sie sich so gefühlt haben.</p>
+      <div id="exhaustionContainer"></div>
+    </div>
+
+    <div class="card">
+      <h3>Körperliche Aktivität</h3>
+
+      <div class="form-grid two">
+        <div>
+          <label for="activeDays">An wie vielen Tagen pro Woche sind Sie körperlich aktiv?</label>
+          <p class="muted">Mindestens mässig ins Schwitzen oder ausser Atem kommen, z. B. zügiges Gehen, Velofahren, Sport.</p>
+          <input type="number" id="activeDays" min="0" max="7" step="1" placeholder="0–7 Tage">
+        </div>
+
+        <div>
+          <label for="activeMinutes">Wie viele Minuten sind Sie an einem solchen Tag aktiv?</label>
+          <input type="number" id="activeMinutes" min="0" step="1" placeholder="Minuten pro aktivem Tag">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Sturzfragen</h3>
+
+      <div class="question-block">
+        <div class="question-title">Sind Sie in den letzten 12 Monaten gestürzt?</div>
+        <div class="radio-row">
+          <label><input type="radio" name="fall12m" value="Ja"> Ja</label>
+          <label><input type="radio" name="fall12m" value="Nein"> Nein</label>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="question-title">Fühlen Sie sich beim Gehen oder Stehen unsicher?</div>
+        <div class="radio-row">
+          <label><input type="radio" name="unsteady" value="Ja"> Ja</label>
+          <label><input type="radio" name="unsteady" value="Nein"> Nein</label>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="question-title">Haben Sie Angst zu stürzen?</div>
+        <div class="radio-row">
+          <label><input type="radio" name="fearFall" value="Ja"> Ja</label>
+          <label><input type="radio" name="fearFall" value="Nein"> Nein</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Aufstehen vom Boden</h3>
+
+      <div class="question-block">
+        <div class="question-title">Trauen Sie es sich zu, selbständig vom Boden aufzustehen?</div>
+        <div class="radio-row">
+          <label><input type="radio" name="floorConfidence" value="Ja"> Ja</label>
+          <label><input type="radio" name="floorConfidence" value="Nein"> Nein</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEITE 3 -->
+  <section class="page" id="page2">
+    <h2>3. Testung vor Ort</h2>
+    <p class="muted">Die Werte werden durch die Therapeut:in eingetragen. Die Stoppuhr oben rechts kann für Gehgeschwindigkeit und 5x Sit-Stand verwendet werden.</p>
+
+    <div class="test-card">
+      <div class="test-title">Gehgeschwindigkeit</div>
+
+      <div class="form-grid three">
+        <div>
+          <label for="gaitDistance">Strecke</label>
+          <select id="gaitDistance">
+            <option value="4">4 m</option>
+            <option value="6">6 m</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="gaitTime1">Trial 1: Zeit in Sekunden</label>
+          <input type="number" id="gaitTime1" min="0" step="0.01" placeholder="z. B. 5.20">
+          <button type="button" onclick="useStopwatchFor('gaitTime1')">Stoppuhr übernehmen</button>
+        </div>
+
+        <div>
+          <label for="gaitTime2">Trial 2: Zeit in Sekunden</label>
+          <input type="number" id="gaitTime2" min="0" step="0.01" placeholder="z. B. 4.90">
+          <button type="button" onclick="useStopwatchFor('gaitTime2')">Stoppuhr übernehmen</button>
+        </div>
+      </div>
+
+      <div class="form-grid two" style="margin-top: 1rem;">
+        <div>
+          <label for="gaitBestTime">Schnellere Zeit</label>
+          <input type="text" id="gaitBestTime" readonly placeholder="automatisch">
+        </div>
+
+        <div>
+          <label for="gaitSpeed">Gehgeschwindigkeit m/s</label>
+          <input type="text" id="gaitSpeed" readonly placeholder="automatisch">
+        </div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-title">5x Sit-Stand</div>
+
+      <div class="form-grid two">
+        <div>
+          <label for="sitStandTime">Zeit in Sekunden</label>
+          <input type="number" id="sitStandTime" min="0" step="0.01" placeholder="z. B. 14.80">
+        </div>
+
+        <div>
+          <label for="sitStandNote">Bemerkung</label>
+          <input type="text" id="sitStandNote" placeholder="z. B. Armlehne benutzt / nicht möglich">
+        </div>
+      </div>
+
+      <div class="timer-actions">
+        <button type="button" onclick="useStopwatchFor('sitStandTime')">Stoppuhr-Zeit für 5x Sit-Stand übernehmen</button>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-title">Griffkraft dominante Hand</div>
+
+      <div class="form-grid three">
+        <div>
+          <label for="gripTrial1">Trial 1 kg</label>
+          <input type="number" id="gripTrial1" min="0" step="0.1" placeholder="kg">
+        </div>
+
+        <div>
+          <label for="gripTrial2">Trial 2 kg</label>
+          <input type="number" id="gripTrial2" min="0" step="0.1" placeholder="kg">
+        </div>
+
+        <div>
+          <label for="gripTrial3">Trial 3 kg</label>
+          <input type="number" id="gripTrial3" min="0" step="0.1" placeholder="kg">
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <label for="gripBest">Bester Wert kg</label>
+        <input type="text" id="gripBest" readonly placeholder="automatisch">
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-title">Transfer Boden → Stand</div>
+
+      <div class="form-grid two">
+        <div>
+          <label for="floorTransfer">Durchführung</label>
+
+          <select id="floorTransfer">
+            <option value="">Bitte auswählen</option>
+            <option value="selbstständig ohne Hilfsmittel möglich">Selbstständig ohne Hilfsmittel</option>
+            <option value="selbstständig mit Hilfsmittel möglich">Selbstständig mit Hilfsmittel</option>
+            <option value="mit Hilfe und/oder Supervision möglich">Mit Hilfe / Supervision möglich</option>
+            <option value="nicht möglich">Nicht möglich</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEITE 4 -->
+  <section class="page" id="page3">
+    <h2>4. Mini-BESTest</h2>
+    <p>Test dynamisches Gleichgewicht.</p>
+    <p>Empfehlung: Vorwiegend den Gesamt-Score verwenden. Die einzelnen Bereiche für sich alleine sind nicht validiert.</p>
+    <p>
+      Detailliertes Durchführungsprotokoll hier:
+      <a href="https://probstjano.github.io/OpenPdf/MiniBEST_Protokoll.pdf" target="_blank" rel="noopener">MiniBEST Protokoll (PDF)</a>
+    </p>
+
+    <div id="miniBestResult" class="mini-result">Mini-BESTest Gesamtscore: 0 / 28
+Antizipatorisch: 0 / 6
+Reaktive posturale Kontrolle: 0 / 6
+Sensorische Orientierung: 0 / 6
+Dynamischer Gang: 0 / 10</div>
+
+    <form id="miniBESTForm">
+      <div id="miniBestContainer"></div>
+    </form>
+  </section>
+
+  <!-- SEITE 5 -->
+  <section class="page" id="page4">
+    <h2>5. Report</h2>
+    <p class="muted">Zusammenfassung aller eingegebenen Werte ohne Interpretation.</p>
+
+    <div id="reportBox"></div>
+
+    <button type="button" class="primary" onclick="window.print()">🖨️ Drucken / als PDF speichern</button>
+  </section>
+
+  <div class="nav-buttons">
+    <button type="button" class="secondary" onclick="goBackPage()">⬅️ Zurück</button>
+
+    <div class="right">
+      <button type="button" class="secondary" onclick="window.location.href='index.html'">🏠 Hauptseite</button>
+      <button type="button" class="primary" onclick="goNextPage()" id="nextBtn">Weiter ➡️</button>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 0;
+    const totalPages = 5;
+
+    const gdsItems = [
+      { text: "Sind Sie grundsätzlich mit Ihrem Leben zufrieden?", yes: 0, no: 1 },
+      { text: "Haben Sie das Gefühl, Ihr Leben sei leer?", yes: 1, no: 0 },
+      { text: "Befürchten Sie, dass Ihnen etwas Schlechtes zustossen wird?", yes: 1, no: 0 },
+      { text: "Fühlen Sie sich die meiste Zeit glücklich?", yes: 0, no: 1 }
+    ];
+
+    const exhaustionOptions = [
+      { label: "selten oder überhaupt nicht (weniger als 1 Tag)", value: 0 },
+      { label: "manchmal (1 bis 2 Tage lang)", value: 1 },
+      { label: "öfters (3 bis 4 Tage lang)", value: 2 },
+      { label: "meistens, die ganze Zeit (5 bis 7 Tage lang)", value: 3 }
+    ];
+
+    const miniBestItems = [
+      {
+        title: "1. VOM SITZEN ZUM STEHEN",
+        instruction: "„Verschränken Sie die Arme vor Ihrer Brust. Versuchen Sie Ihre Hände nicht einzusetzen, sofern nicht notwendig. Sie sollten den Stuhl nicht mit der Rückseite Ihrer Beine berühren, wenn Sie stehen. Bitte stehen Sie jetzt auf.“",
+        options: [
+          "(2) Normal: Steht ohne Einsatz der Hände auf und stabilisiert sich selbstständig.",
+          "(1) Moderat: Kommt beim ersten Versuch MIT Einsatz der Hände in den Stand.",
+          "(0) Schwer: Kann nicht ohne Unterstützung vom Stuhl aufstehen ODER benötigt mehrere Versuche mit Einsatz der Hände."
+        ]
+      },
+      {
+        title: "2. AUF DIE ZEHENSPITZEN STELLEN",
+        instruction: "„Stellen Sie sich schulterbreit hin. Legen Sie die Hände auf Ihre Hüften. Stellen Sie sich so hoch wie möglich auf Ihre Zehenspitzen. Ich werde laut auf drei Sekunden zählen. Versuchen Sie die Position für mindestens drei Sekunden zu halten.“",
+        options: [
+          "(2) Normal: Stabil für 3 Sek. bei maximaler Höhe.",
+          "(1) Moderat: Fersen sind vom Boden abgehoben, aber nicht in vollem Ausmaß ODER deutliche Instabilität während der 3 Sek.",
+          "(0) Schwer: ≤ 3 Sek."
+        ]
+      },
+      {
+        title: "3. AUF EINEM BEIN STEHEN",
+        instruction: "„Schauen Sie geradeaus. Behalten Sie Ihre Hände auf den Hüften. Heben Sie Ihr Bein vom Boden nach hinten ab. Bleiben Sie so lange wie möglich auf einem Bein stehen.“",
+        options: [
+          "(2) Normal: 20 Sek.",
+          "(1) Moderat: < 20 Sek.",
+          "(0) Schwer: Nicht möglich."
+        ]
+      },
+      {
+        title: "4. KOMPENSATORISCHE SCHUTZSCHRITTE – VORWÄRTS",
+        instruction: "„Lehnen Sie sich nach vorne gegen meine Hände. Wenn ich loslasse, tun Sie was notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“",
+        options: [
+          "(2) Normal: Kompensiert selbstständig mit einem einzelnen, großen Schritt.",
+          "(1) Moderat: Mehr als ein Schritt wird benötigt.",
+          "(0) Schwer: Kein Schritt ODER würde stürzen, wenn nicht aufgefangen."
+        ]
+      },
+      {
+        title: "5. KOMPENSATORISCHE SCHUTZSCHRITTE – RÜCKWÄRTS",
+        instruction: "„Lehnen Sie sich rückwärts gegen meine Hände. Wenn ich loslasse, tun Sie was notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“",
+        options: [
+          "(2) Normal: Kompensiert selbstständig mit einem einzelnen, großen Schritt.",
+          "(1) Moderat: Mehr als ein Schritt wird benötigt.",
+          "(0) Schwer: Kein Schritt ODER würde stürzen, wenn nicht aufgefangen."
+        ]
+      },
+      {
+        title: "6. KOMPENSATORISCHE SCHUTZSCHRITTE – SEITWÄRTS",
+        instruction: "„Lehnen Sie sich zur Seite in meine Hände. Wenn ich loslasse, tun Sie was notwendig ist, einschließlich eines Schrittes, um einen Sturz zu vermeiden.“",
+        options: [
+          "(2) Normal: Kompensiert selbstständig mit einem Schritt.",
+          "(1) Moderat: Mehrere Schritte sind notwendig.",
+          "(0) Schwer: Stürzt oder Schritt nicht möglich."
+        ]
+      },
+      {
+        title: "7. STAND; AUGEN GEÖFFNET, FESTER UNTERGRUND",
+        instruction: "„Legen Sie Ihre Hände auf die Hüften. Stellen Sie Ihre Füße zusammen. Bleiben Sie so stabil und ruhig stehen wie möglich, bis ich Stopp sage.“",
+        options: [
+          "(2) Normal: 30 Sek.",
+          "(1) Moderat: < 30 Sek.",
+          "(0) Schwer: Nicht möglich."
+        ]
+      },
+      {
+        title: "8. STAND; AUGEN GESCHLOSSEN, SCHAUMSTOFF-UNTERGRUND",
+        instruction: "„Stellen Sie sich auf den Schaumstoff-Untergrund. Hände auf die Hüften. Füße zusammen. Ich beginne die Zeit zu messen, sobald Sie die Augen schließen.“",
+        options: [
+          "(2) Normal: 30 Sek.",
+          "(1) Moderat: < 30 Sek.",
+          "(0) Schwer: Nicht möglich."
+        ]
+      },
+      {
+        title: "9. STEIGUNG – AUGEN GESCHLOSSEN",
+        instruction: "„Bitte stellen Sie sich auf die Rampe mit Steigung. Ich beginne die Zeit zu messen, sobald Sie die Augen schließen.“",
+        options: [
+          "(2) Normal: Steht selbstständig 30 Sek. und passt die Körperhaltung an.",
+          "(1) Moderat: Steht selbstständig <30 Sek. ODER passt die Körperhaltung dem Untergrund an.",
+          "(0) Schwer: Nicht möglich."
+        ]
+      },
+      {
+        title: "10. ÄNDERUNG DER GEHGESCHWINDIGKEIT",
+        instruction: "„Beginnen Sie in normaler Geschwindigkeit. Wenn ich schnell sage, gehen Sie so schnell Sie können. Wenn ich langsam sage, gehen Sie sehr langsam.“",
+        options: [
+          "(2) Normal: Ändert deutlich die Gehgeschwindigkeit ohne Gleichgewichtsbeeinträchtigung.",
+          "(1) Moderat: Nicht möglich die Geschwindigkeit zu ändern oder Gleichgewichtsbeeinträchtigung.",
+          "(0) Schwer: Keine deutliche Änderung UND Gleichgewichtsbeeinträchtigung."
+        ]
+      },
+      {
+        title: "11. GEHEN MIT KOPFDREHUNGEN – HORIZONTAL",
+        instruction: "„Gehen Sie in normaler Geschwindigkeit. Wenn ich rechts sage, drehen Sie den Kopf nach rechts. Wenn ich links sage, drehen Sie den Kopf nach links.“",
+        options: [
+          "(2) Normal: Kopfdrehungen ohne Änderung der Gehgeschwindigkeit und mit Gleichgewicht.",
+          "(1) Moderat: Kopfdrehungen bei Verringerung der Gehgeschwindigkeit.",
+          "(0) Schwer: Kopfdrehungen mit Gleichgewichtsbeeinträchtigungen."
+        ]
+      },
+      {
+        title: "12. GEHEN MIT KÖRPERDREHUNG",
+        instruction: "„Wenn ich drehen und Stopp sage, drehen Sie sich so schnell Sie können um 180° und halten an.“",
+        options: [
+          "(2) Normal: Dreht sich schnell mit geschlossenen Füßen ≤ 3 Schritte.",
+          "(1) Moderat: Dreht sich langsam mit geschlossenen Füßen ≥ 4 Schritte.",
+          "(0) Schwer: Kann sich nicht mit geschlossenen Füßen drehen und zeigt Gleichgewichtsbeeinträchtigung."
+        ]
+      },
+      {
+        title: "13. GEHEN ÜBER EIN HINDERNIS",
+        instruction: "„Wenn Sie die Kiste erreichen, steigen Sie darüber, nicht daran vorbei, und gehen danach weiter.“",
+        options: [
+          "(2) Normal: Steigt über die Kiste bei minimaler Änderung der Gehgeschwindigkeit.",
+          "(1) Moderat: Berührt die Kiste ODER verlangsamt deutlich.",
+          "(0) Schwer: Nicht möglich ODER geht an der Kiste vorbei."
+        ]
+      },
+      {
+        title: "14. TIMED UP & GO MIT DUAL TASK",
+        instruction: "„Zählen Sie laut in Dreierschritten rückwärts. Bei Los stehen Sie auf, gehen zur Markierung, drehen, gehen zurück und setzen sich wieder.“",
+        options: [
+          "(2) Normal: Kein erkennbarer Unterschied im Vergleich zum TUG ohne Dual Task.",
+          "(1) Moderat: Dual Task beeinflusst entweder Zählen ODER Gehen >10%.",
+          "(0) Schwer: Hört beim Gehen auf zu zählen ODER bleibt während des Zählens stehen."
+        ]
+      }
+    ];
+
+    let swInterval = null;
+    let swStartTime = null;
+    let swElapsed = 0;
+    let swRunning = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setToday();
+      renderGDS();
+      renderExhaustion();
+      renderMiniBest();
+      setupAutoCalculations();
+      updatePage();
+    });
+
+    function setToday() {
+      document.getElementById("screeningDate").value = new Date().toISOString().split("T")[0];
+    }
+
+    function renderGDS() {
+      const container = document.getElementById("gdsContainer");
+      container.innerHTML = "";
+
+      gdsItems.forEach((item, index) => {
+        const q = index + 1;
+
+        container.innerHTML += `
+          <div class="question-block">
+            <div class="question-title">${q}. ${item.text}</div>
+
+            <div class="radio-row">
+              <label><input type="radio" name="gds${q}" value="${item.yes}"> Ja</label>
+              <label><input type="radio" name="gds${q}" value="${item.no}"> Nein</label>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function renderExhaustion() {
+      const container = document.getElementById("exhaustionContainer");
+
+      container.innerHTML = `
+        <div class="exhaustion-grid">
+          <div class="exhaustion-header">Während der letzten zwei Wochen...</div>
+          <div class="exhaustion-header">selten oder überhaupt nicht<br><span class="muted">weniger als 1 Tag</span></div>
+          <div class="exhaustion-header">manchmal<br><span class="muted">1 bis 2 Tage</span></div>
+          <div class="exhaustion-header">öfters<br><span class="muted">3 bis 4 Tage</span></div>
+          <div class="exhaustion-header">meistens / ganze Zeit<br><span class="muted">5 bis 7 Tage</span></div>
+
+          <div class="exhaustion-question">War alles anstrengend für mich.</div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="0"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="1"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="2"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion1" value="3"></div>
+
+          <div class="exhaustion-question">Konnte ich mich zu nichts aufraffen.</div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="0"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="1"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="2"></div>
+          <div class="exhaustion-cell"><input type="radio" name="exhaustion2" value="3"></div>
+        </div>
+      `;
+    }
+
+    function renderMiniBest() {
+      const container = document.getElementById("miniBestContainer");
+      container.innerHTML = "";
+
+      miniBestItems.forEach((item, index) => {
+        const q = index + 1;
+        container.innerHTML += `
+          <div class="question-block">
+            <label for="mb${q}"><strong>${item.title}</strong></label>
+            <p><strong>Anweisung:</strong> ${item.instruction}</p>
+            <select name="mb${q}" id="mb${q}" onchange="calculateMiniBEST()">
+              <option value="">Bitte auswählen</option>
+              <option value="2">${item.options[0]}</option>
+              <option value="1">${item.options[1]}</option>
+              <option value="0">${item.options[2]}</option>
+            </select>
+          </div>
+        `;
+      });
+    }
+
+    function setupAutoCalculations() {
+      document.getElementById("gaitTime1").addEventListener("input", calculateGaitSpeed);
+      document.getElementById("gaitTime2").addEventListener("input", calculateGaitSpeed);
+      document.getElementById("gaitDistance").addEventListener("change", calculateGaitSpeed);
+
+      document.getElementById("gripTrial1").addEventListener("input", calculateGripBest);
+      document.getElementById("gripTrial2").addEventListener("input", calculateGripBest);
+      document.getElementById("gripTrial3").addEventListener("input", calculateGripBest);
+    }
+
+    function updatePage() {
+      document.querySelectorAll(".page").forEach((page, index) => {
+        page.classList.toggle("active", index === currentPage);
+      });
+
+      document.querySelectorAll(".step-pill").forEach((pill, index) => {
+        pill.classList.toggle("active", index === currentPage);
+      });
+
+      document.getElementById("nextBtn").textContent =
+        currentPage === totalPages - 1 ? "Report aktualisieren" : "Weiter ➡️";
+
+      document.getElementById("stopwatch").style.display =
+        currentPage === 2 || currentPage === 3 ? "block" : "none";
+
+      if (currentPage === totalPages - 1) {
+        generateReport();
+      }
+
+      window.scrollTo(0, 0);
+    }
+
+    function goNextPage() {
+      if (currentPage < totalPages - 1) {
+        currentPage++;
+        updatePage();
+      } else {
+        generateReport();
+      }
+    }
+
+    function goBackPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        updatePage();
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    function swUpdate() {
+      const now = Date.now();
+      const diff = now - swStartTime + swElapsed;
+      const ms = Math.floor((diff % 1000) / 100);
+      const sec = Math.floor(diff / 1000) % 60;
+      const min = Math.floor(diff / 60000);
+
+      document.getElementById("swDisplay").textContent =
+        `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${ms}`;
+    }
+
+    function swToggle() {
+      if (!swRunning) {
+        swStartTime = Date.now();
+        swInterval = setInterval(swUpdate, 100);
+        swRunning = true;
+        document.getElementById("swMainBtn").textContent = "⏸";
+      } else {
+        swElapsed += Date.now() - swStartTime;
+        clearInterval(swInterval);
+        swInterval = null;
+        swRunning = false;
+        document.getElementById("swMainBtn").textContent = "▶";
+      }
+    }
+
+    function swReset() {
+      swElapsed = 0;
+      clearInterval(swInterval);
+      swInterval = null;
+      swRunning = false;
+      document.getElementById("swDisplay").textContent = "00:00.0";
+      document.getElementById("swMainBtn").textContent = "▶";
+    }
+
+    function getStopwatchSeconds() {
+      const current = swRunning ? Date.now() - swStartTime + swElapsed : swElapsed;
+      return (current / 1000).toFixed(2);
+    }
+
+    function useStopwatchFor(inputId) {
+      document.getElementById(inputId).value = getStopwatchSeconds();
+
+      if (inputId === "gaitTime1" || inputId === "gaitTime2") {
+        calculateGaitSpeed();
+      }
+    }
+
+    function calculateGaitSpeed() {
+      const distance = Number(document.getElementById("gaitDistance").value);
+      const time1 = Number(document.getElementById("gaitTime1").value);
+      const time2 = Number(document.getElementById("gaitTime2").value);
+
+      const bestTimeOutput = document.getElementById("gaitBestTime");
+      const speedOutput = document.getElementById("gaitSpeed");
+
+      const validTimes = [time1, time2].filter(t => !isNaN(t) && t > 0);
+
+      if (!distance || validTimes.length === 0) {
+        bestTimeOutput.value = "";
+        speedOutput.value = "";
+        return;
+      }
+
+      const bestTime = Math.min(...validTimes);
+      const speed = distance / bestTime;
+
+      bestTimeOutput.value = bestTime.toFixed(2);
+      speedOutput.value = speed.toFixed(2);
+    }
+
+    function calculateGripBest() {
+      const values = [
+        Number(document.getElementById("gripTrial1").value),
+        Number(document.getElementById("gripTrial2").value),
+        Number(document.getElementById("gripTrial3").value)
+      ].filter(v => !isNaN(v) && v > 0);
+
+      const output = document.getElementById("gripBest");
+
+      if (values.length === 0) {
+        output.value = "";
+        return;
+      }
+
+      output.value = Math.max(...values).toFixed(1);
+    }
+
+    function calculateMiniBEST() {
+      let total = 0;
+      let antizipatorisch = 0;
+      let reaktiv = 0;
+      let sensorisch = 0;
+      let dynamisch = 0;
+
+      for (let i = 1; i <= 14; i++) {
+        const selected = document.querySelector(`select[name="mb${i}"]`);
+        if (!selected || selected.value === "") continue;
+
+        const val = Number(selected.value);
+        total += val;
+
+        if (i <= 3) antizipatorisch += val;
+        else if (i <= 6) reaktiv += val;
+        else if (i <= 9) sensorisch += val;
+        else dynamisch += val;
+      }
+
+      document.getElementById("miniBestResult").textContent =
+        `Mini-BESTest Gesamtscore: ${total} / 28\n` +
+        `Antizipatorisch: ${antizipatorisch} / 6\n` +
+        `Reaktive posturale Kontrolle: ${reaktiv} / 6\n` +
+        `Sensorische Orientierung: ${sensorisch} / 6\n` +
+        `Dynamischer Gang: ${dynamisch} / 10`;
+
+      return { total, antizipatorisch, reaktiv, sensorisch, dynamisch };
+    }
+
+    function radioValue(name) {
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      return selected ? selected.value : "nicht beantwortet";
+    }
+
+    function inputValue(id) {
+      const el = document.getElementById(id);
+      return el && el.value ? el.value : "nicht eingetragen";
+    }
+
+    function calculateGDS() {
+      let total = 0;
+      let answered = 0;
+
+      for (let i = 1; i <= 4; i++) {
+        const selected = document.querySelector(`input[name="gds${i}"]:checked`);
+        if (selected) {
+          total += Number(selected.value);
+          answered++;
+        }
+      }
+
+      return { total, answered };
+    }
+
+    function calculateExhaustion() {
+      let total = 0;
+      let answered = 0;
+      const answers = [];
+
+      for (let i = 1; i <= 2; i++) {
+        const selected = document.querySelector(`input[name="exhaustion${i}"]:checked`);
+        if (selected) {
+          const val = Number(selected.value);
+          total += val;
+          answered++;
+          const option = exhaustionOptions.find(o => o.value === val);
+          answers.push(option ? option.label : selected.value);
+        } else {
+          answers.push("nicht beantwortet");
+        }
+      }
+
+      return { total, answered, answers };
+    }
+
+    function generateReport() {
+      calculateGaitSpeed();
+      calculateGripBest();
+
+      const gds = calculateGDS();
+      const exhaustion = calculateExhaustion();
+      const mini = calculateMiniBEST();
+
+      const firstName = inputValue("firstName");
+      const lastName = inputValue("lastName");
+      const birthDate = inputValue("birthDate");
+      const screeningDate = inputValue("screeningDate");
+
+      const activeDays = inputValue("activeDays");
+      const activeMinutes = inputValue("activeMinutes");
+
+      const gaitDistance = inputValue("gaitDistance");
+      const gaitTime1 = inputValue("gaitTime1");
+      const gaitTime2 = inputValue("gaitTime2");
+      const gaitBestTime = inputValue("gaitBestTime");
+      const gaitSpeed = inputValue("gaitSpeed");
+
+      const sitStandTime = inputValue("sitStandTime");
+      const sitStandNote = inputValue("sitStandNote");
+
+      const gripTrial1 = inputValue("gripTrial1");
+      const gripTrial2 = inputValue("gripTrial2");
+      const gripTrial3 = inputValue("gripTrial3");
+      const gripBest = inputValue("gripBest");
+
+      const floorTransfer = inputValue("floorTransfer");
+
+      document.getElementById("reportBox").innerHTML = `
+        <div class="report-section">
+          <h3>Patient:in</h3>
+          <p><strong>Name:</strong> ${firstName} ${lastName}<br>
+          <strong>Geburtsdatum:</strong> ${birthDate}<br>
+          <strong>Screening-Datum:</strong> ${screeningDate}</p>
+        </div>
+
+        <div class="report-section">
+          <h3>GDS-4</h3>
+          <p><strong>Score:</strong> ${gds.total} / 4<br>
+          <strong>Beantwortete Fragen:</strong> ${gds.answered} / 4</p>
+        </div>
+
+        <div class="report-section">
+          <h3>Exhaustion</h3>
+          <p><strong>Score:</strong> ${exhaustion.total} / 6<br>
+          <strong>Beantwortete Fragen:</strong> ${exhaustion.answered} / 2<br>
+          <strong>Alles war anstrengend:</strong> ${exhaustion.answers[0]}<br>
+          <strong>Zu nichts aufraffen:</strong> ${exhaustion.answers[1]}</p>
+        </div>
+
+        <div class="report-section">
+          <h3>Körperliche Aktivität</h3>
+          <p>
+            <strong>Tage pro Woche:</strong> ${activeDays}<br>
+            <strong>Minuten pro aktivem Tag:</strong> ${activeMinutes}<br>
+            <strong>Total Minuten pro Woche:</strong>
+            ${
+              (!isNaN(Number(activeDays)) && !isNaN(Number(activeMinutes)))
+                ? Number(activeDays) * Number(activeMinutes)
+                : "nicht berechenbar"
+            }
+          </p>
+        </div>
+
+        <div class="report-section">
+          <h3>Sturzfragen</h3>
+          <p>
+            <strong>Sturz in den letzten 12 Monaten:</strong> ${radioValue("fall12m")}<br>
+            <strong>Unsicherheit beim Gehen oder Stehen:</strong> ${radioValue("unsteady")}<br>
+            <strong>Angst zu stürzen:</strong> ${radioValue("fearFall")}<br>
+            <strong>Traut sich selbständig vom Boden aufzustehen:</strong> ${radioValue("floorConfidence")}
+          </p>
+        </div>
+
+        <div class="report-section">
+          <h3>Vor-Ort-Testung</h3>
+          <p>
+            <strong>Gehgeschwindigkeit:</strong><br>
+            Trial 1: ${gaitTime1} s<br>
+            Trial 2: ${gaitTime2} s<br>
+            Schnellere Zeit: ${gaitBestTime} s<br>
+            ${gaitDistance} m / ${gaitBestTime} s = ${gaitSpeed} m/s<br><br>
+
+            <strong>5x Sit-Stand:</strong> ${sitStandTime} s<br>
+            <strong>Bemerkung 5x Sit-Stand:</strong> ${sitStandNote}<br><br>
+
+            <strong>Griffkraft dominante Hand:</strong><br>
+            Trial 1: ${gripTrial1} kg<br>
+            Trial 2: ${gripTrial2} kg<br>
+            Trial 3: ${gripTrial3} kg<br>
+            Bester Wert: ${gripBest} kg
+          </p>
+        </div>
+
+        <div class="report-section">
+          <h3>Mini-BESTest</h3>
+          <p><strong>Gesamtscore:</strong> ${mini.total} / 28<br>
+          <strong>Antizipatorisch:</strong> ${mini.antizipatorisch} / 6<br>
+          <strong>Reaktive posturale Kontrolle:</strong> ${mini.reaktiv} / 6<br>
+          <strong>Sensorische Orientierung:</strong> ${mini.sensorisch} / 6<br>
+          <strong>Dynamischer Gang:</strong> ${mini.dynamisch} / 10</p>
+        </div>
+
+        <div class="report-section">
+          <h3>Transfer Boden → Stand</h3>
+          <p><strong>Durchführung:</strong> ${floorTransfer}</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
