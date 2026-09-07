@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leistungen in Abwesenheit</title>
+  <style>
+    :root {
+      --navy:#173b4a; --teal:#237f7b; --ink:#263f49; --muted:#64777e;
+      --mint:#e8f4f2; --pale:#f4f8f8; --line:#c8dadd; --white:#fff;
+    }
+    * { box-sizing:border-box; }
+    html { color-scheme:light; scroll-behavior:smooth; }
+    body { margin:0; background:#fff; color:var(--ink); font:16px/1.45 Arial, Helvetica, sans-serif; }
+    button { font:inherit; }
+    main { width:min(1180px, calc(100% - 32px)); margin:32px auto 64px; }
+    .timeline { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); border:1px solid var(--line); }
+    .phase { min-width:0; background:var(--pale); border-right:1px solid var(--line); }
+    .phase:last-child { border-right:0; }
+    .phase:nth-child(odd) { background:#f1f8f7; }
+    .phase-head { padding:13px 10px 12px; background:var(--navy); color:var(--white); text-align:center; font-weight:700; letter-spacing:.02em; }
+    .phase:nth-child(odd) .phase-head { background:var(--teal); }
+    .phase-number { display:block; font-size:.8rem; margin-bottom:2px; }
+    .phase-items { display:flex; flex-direction:column; gap:2px; padding:10px; }
+    .absence { grid-column:1 / -1; display:grid; grid-template-columns:220px 1fr; align-items:stretch; border-top:1px solid var(--line); background:#f1f8f7; }
+    .absence-title { display:flex; align-items:center; justify-content:center; padding:12px; background:var(--teal); color:#fff; font-weight:700; text-align:center; }
+    .absence-items { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:4px 12px; padding:8px 12px; }
+    .entry-link { width:100%; padding:7px 8px; border:0; border-radius:5px; background:transparent; color:var(--teal); text-align:left; cursor:pointer; line-height:1.25; }
+    .entry-link:hover, .entry-link:focus-visible { background:var(--white); color:var(--navy); outline:2px solid var(--teal); outline-offset:-2px; }
+    dialog { width:min(780px, calc(100% - 24px)); max-height:min(86vh, 820px); padding:0; border:0; border-radius:14px; box-shadow:0 24px 80px rgba(23,59,74,.28); color:var(--ink); }
+    dialog::backdrop { background:rgba(14,35,44,.62); backdrop-filter:blur(2px); }
+    .dialog-head { position:sticky; top:0; z-index:2; display:flex; align-items:flex-start; gap:16px; padding:20px 22px 16px; background:var(--navy); color:var(--white); }
+    .dialog-title { flex:1; margin:0; font-size:1.3rem; line-height:1.25; }
+    .close { flex:0 0 auto; width:38px; height:38px; border:1px solid rgba(255,255,255,.45); border-radius:50%; background:transparent; color:#fff; cursor:pointer; font-size:1.5rem; line-height:1; }
+    .close:hover, .close:focus-visible { background:rgba(255,255,255,.15); outline:2px solid #fff; outline-offset:2px; }
+    .dialog-body { padding:22px; overflow:auto; }
+    .when { margin:0 0 18px; color:var(--ink); }
+    .when strong { color:var(--teal); }
+    .options { display:grid; gap:10px; }
+    .copy-row { display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:12px; align-items:center; padding:13px 14px; background:var(--mint); border:1px solid var(--line); border-radius:8px; }
+    .copy-text { min-width:0; line-height:1.4; }
+    .copy-button { min-width:98px; padding:9px 13px; border:0; border-radius:7px; background:var(--teal); color:#fff; font-weight:700; cursor:pointer; }
+    .copy-button:hover, .copy-button:focus-visible { background:var(--navy); outline:2px solid var(--teal); outline-offset:2px; }
+    .tariff { margin:16px 0 0; color:var(--muted); font-size:.9rem; }
+    @media (max-width:800px) {
+      main { width:min(100% - 20px, 620px); margin-top:10px; }
+      .timeline { grid-template-columns:1fr; }
+      .phase { border-right:0; border-bottom:1px solid var(--line); }
+      .phase:last-child { border-bottom:0; }
+      .absence { grid-template-columns:1fr; }
+      .absence-items { grid-template-columns:1fr; }
+    }
+    @media (max-width:520px) {
+      .copy-row { grid-template-columns:1fr; }
+      .copy-button { width:100%; }
+      .dialog-head, .dialog-body { padding:16px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="timeline" aria-label="Behandlungspfad" id="timeline"></section>
+  </main>
+
+  <dialog id="detail-dialog" aria-labelledby="detail-title">
+    <header class="dialog-head">
+      <h1 class="dialog-title" id="detail-title"></h1>
+      <button class="close" type="button" aria-label="Schließen">×</button>
+    </header>
+    <div class="dialog-body">
+      <p class="when" id="detail-when"></p>
+      <div class="options" id="detail-options"></div>
+      <p class="tariff" id="detail-tariff"></p>
+    </div>
+  </dialog>
+
+  <script>
+    const actions = [
+      {id:'studium', title:'Studium von Unterlagen', when:'Wenn OP-Berichte, Bildgebung oder weitere Fremdunterlagen für Befund, Sicherheit oder Therapieplanung gelesen und interpretiert werden.', tariff:'UV/MV/IV 25.710', options:['Studium von Unterlagen zur Ergänzung der Befunderhebung und Behandlungsplanung.']},
+      {id:'unterlagen', title:'Fehlende Unterlagen und Informationen organisieren/bündeln', when:'Wenn Informationen auf der Verordnung fehlen oder fehlerhaft sind oder weitere Berichte und Unterlagen benötigt werden.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Klärung und Organisation fehlender oder fehlerhafter behandlungsrelevanter Angaben und Unterlagen.','Rücksprache mit der Arztpraxis zur Organisation fehlender Unterlagen.']},
+      {id:'vorgaben', title:'Nähere Informationen zu Vorgaben und Limiten klären', when:'Wenn medizinische Belastungs-, Freigabe- oder Vorsichtsvorgaben unklar sind und eine Rücksprache oder Recherche erforderlich ist.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Kommunikation zur Klärung von Behandlungsschema oder Belastungsfreigabe.','Klärung therapierelevanter Belastungs- und Vorsichtsvorgaben für die weitere Behandlung.']},
+      {id:'fall', title:'Besonderen Fall vorbereiten und recherchieren', when:'Wenn Diagnose, Eingriff oder Situation eine fallspezifische Vorbereitung oder Recherche erfordert.', tariff:'UV/MV/IV 25.710', options:['Fallspezifische Recherche und Vorbereitung zur Befunderhebung und Behandlungsplanung.']},
+      {id:'assessment', title:'Assessment auswerten', when:'Wenn die Ergebnisse eines Assessments ausserhalb des Patientenkontakts ausgewertet und therapeutisch interpretiert werden.', tariff:'UV/MV/IV 25.710', options:['Auswertung und Interpretation eines Assessments.']},
+      {id:'befund', title:'Befund nachträglich bearbeiten', when:'Wenn der Befund nachträglich bearbeitet und vervollständigt wird.', tariff:'UV/MV/IV 25.710', options:['Zusammenführung und Auswertung von Untersuchungsbefunden und Tests.','Auswertung und Beurteilung von Befundmessungen und Tests.']},
+      {id:'therapie-planen', title:'Therapie planen und Verlaufszeichen vorbereiten', when:'Wenn die Behandlung sowie weitere Tests, Assessments oder Verlaufszeichen geplant werden.', tariff:'UV/MV/IV 25.710', options:['Patientenspezifische Behandlungsplanung inklusive Vorbereitung von Verlaufszeichen und Assessments.']},
+      {id:'patienteninfo', title:'Unterlagen und Informationen für Patientinnen und Patienten zusammenstellen', when:'Wenn Edukationsmaterial, Hilfsangebote oder Entscheidungshilfen ausserhalb der Behandlung recherchiert und zusammengestellt werden.', tariff:'UV/MV/IV 25.710', options:['Recherche und Zusammenstellung patientenspezifischer Informationen, Edukationsmaterialien und Hilfsangebote.']},
+      {id:'training-erstellen', title:'Trainingsplan erstellen', when:'Wenn ein patientenspezifischer Trainingsplan ausserhalb der Behandlung erstellt wird.', tariff:'UV/MV/IV 25.710', options:['Erstellung eines patientenspezifischen Trainingsplans.']},
+      {id:'reassessment', title:'Re-Assessment auswerten', when:'Wenn die Ergebnisse eines Re-Assessments ausserhalb des Patientenkontakts ausgewertet und therapeutisch interpretiert werden.', tariff:'UV/MV/IV 25.710', options:['Auswertung und Interpretation eines Re-Assessments.']},
+      {id:'training-anpassen', title:'Trainingsprogramm anpassen', when:'Wenn ein Trainingsprogramm aufgrund des Verlaufs angepasst wird.', tariff:'UV/MV/IV 25.710', options:['Anpassung des Trainingsprogramms.']},
+      {id:'arztpraxis', title:'Mit behandelndem Arzt oder behandelnder Ärztin abstimmen', when:'Wenn Unterlagen, Vorgaben, Behandlungsverlauf oder das weitere Vorgehen mit der Arztpraxis geklärt werden müssen.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Austausch mit der Arztpraxis zur Koordination der weiteren Behandlung.','Kommunikation mit der Arztpraxis zur Klärung behandlungsrelevanter Informationen.']},
+      {id:'fachpersonen', title:'Mit Fachpersonen oder Angehörigen abstimmen', when:'Wenn weitere Fachpersonen, Eltern, Angehörige oder Betreuungspersonen für das Behandlungsziel einbezogen werden müssen.', tariff:'UV/MV/IV 25.720', options:['Fachlicher Austausch mit einer an der Behandlung beteiligten Fachperson.','Austausch mit Eltern, Angehörigen oder Betreuungspersonen.']},
+      {id:'besprechung', title:'Besprechung mit Fachpersonen oder Arztpraxis organisieren', when:'Wenn ein notwendiger Austausch mit Fach- oder Bezugspersonen vorbereitet werden muss.', tariff:'UV/MV/IV 25.710', options:['Vorbereitung des Austauschs mit einer an der Behandlung beteiligten Fachperson.']},
+      {id:'rebefund', title:'Re-Befund und Re-Tests auswerten', when:'Wenn Re-Befund und Re-Tests ausserhalb des Patientenkontakts ausgewertet und therapeutisch interpretiert werden.', tariff:'UV/MV/IV 25.710', options:['Auswertung und Interpretation von Re-Befund und Re-Tests.']},
+      {id:'therapie-anpassen', title:'Evaluation und Therapieplanung anpassen', when:'Wenn die Behandlungsplanung aufgrund von Assessments und Verlauf angepasst wird.', tariff:'UV/MV/IV 25.710', options:['Anpassung der Behandlungsplanung auf Grundlage von Assessments und Verlauf.']},
+      {id:'folgeverordnung', title:'Rücksprache mit der Arztpraxis und Folgeverordnung koordinieren', when:'Wenn eine Folgeverordnung angefordert oder begründet wird.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Kommunikation mit der Arztpraxis zur Koordination der Weiterbehandlung.']},
+      {id:'rueckkehr', title:'Rückkehrkriterien klären und vorbereiten', when:'Wenn für Arbeit, Sport oder Alltag fallspezifische Kriterien vorbereitet werden müssen.', tariff:'UV/MV/IV 25.710', options:['Fallspezifische Recherche und Zusammenstellung von Kriterien für die Rückkehr in Arbeit, Training, Sport oder Alltag.']},
+      {id:'abschlussmessung', title:'Abschlussmessung auswerten', when:'Wenn Abschlussmessungen ausserhalb des Patientenkontakts ausgewertet und therapeutisch interpretiert werden.', tariff:'UV/MV/IV 25.710', options:['Auswertung und Interpretation der Abschlussassessments.']},
+      {id:'selbstmanagement', title:'Selbstmanagement-Plan erstellen', when:'Wenn ein individueller Übergangsplan nicht sinnvoll während der Sitzung fertiggestellt werden kann.', tariff:'UV/MV/IV 25.710', options:['Erstellung eines Selbstmanagement-Plans.']},
+      {id:'abschluss', title:'Abschlussbericht erstellen oder Abschlusskommunikation', when:'Wenn zum Therapieende eine fachliche Rückmeldung an Beteiligte erfolgt.', tariff:'UV/MV/IV 25.720', options:['Abschlusskommunikation mit der behandelnden Arztpraxis.']},
+      {id:'uebergabe-intern', title:'Ferienübergabe oder interne Übergabe', when:'Wenn eine Ferienübergabe oder interne Übergabe schriftlich oder mündlich erfolgt.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Besprechung mit einer an der Behandlung beteiligten Fachperson zur Koordination der weiteren Behandlung.']},
+      {id:'uebergabe-extern', title:'Externe Weiterbehandlung', when:'Wenn die Behandlung an eine externe Institution oder Fachperson übergeben wird.', tariff:'UV/MV/IV 25.710 / 25.720', options:['Kommunikation mit der weiterbehandelnden Institution.']}
+    ];
+
+    const phases = [
+      {title:'UM ERSTTERMIN', items:[['Studium von Unterlagen: OP-Berichte, Bildgebung etc.','studium'],['Fehlende Unterlagen und Informationen organisieren/bündeln','unterlagen'],['Nähere Informationen zu Vorgaben und Limiten klären','vorgaben'],['Besonderen Fall vorbereiten und recherchieren','fall'],['Assessment auswerten und interpretieren','assessment'],['Befundtests auswerten, zusammenführen und interpretieren','befund'],['Therapie planen und Verlaufszeichen vorbereiten','therapie-planen']]},
+      {title:'FOLGETERMINE', items:[['Unterlagen/Informationen für Patientinnen und Patienten zusammenstellen','patienteninfo'],['Trainingsplan erstellen','training-erstellen'],['Re-Assessment auswerten','reassessment'],['Trainingsprogramm anpassen','training-anpassen'],['Mit behandelndem Arzt oder behandelnder Ärztin abstimmen','arztpraxis'],['Mit Fachpersonen oder Angehörigen abstimmen','fachpersonen'],['Besprechung mit Fachpersonen oder Arztpraxis organisieren','besprechung']]},
+      {title:'FOLGEVERORDNUNG', items:[['Re-Befund und Re-Tests auswerten','rebefund'],['Evaluation und Therapieplanung anpassen','therapie-anpassen'],['Rücksprache mit der Arztpraxis und Folgeverordnung koordinieren','folgeverordnung']]},
+      {title:'ABSCHLUSS', items:[['Rückkehrkriterien klären und vorbereiten','rueckkehr'],['Abschlussmessung auswerten','abschlussmessung'],['Selbstmanagement-Plan erstellen','selbstmanagement'],['Trainingsplan erstellen','training-erstellen'],['Abschlussbericht erstellen oder Abschlusskommunikation','abschluss']]}
+    ];
+
+    const byId = new Map(actions.map(item => [item.id, item]));
+    const timeline = document.querySelector('#timeline');
+    const dialog = document.querySelector('#detail-dialog');
+    const title = document.querySelector('#detail-title');
+    const when = document.querySelector('#detail-when');
+    const options = document.querySelector('#detail-options');
+    const tariff = document.querySelector('#detail-tariff');
+
+    function entryButton(text, id, index) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'entry-link'; button.dataset.detail = id;
+      if (index) {
+        const number = document.createElement('span'); number.className = 'index'; number.textContent = index;
+        const label = document.createElement('span'); label.textContent = text;
+        button.append(number, label);
+      } else button.textContent = text;
+      return button;
+    }
+
+    phases.forEach((phase, phaseIndex) => {
+      const section = document.createElement('section'); section.className = 'phase';
+      const head = document.createElement('div'); head.className = 'phase-head';
+      head.innerHTML = `<span class="phase-number">${phaseIndex + 1}</span>${phase.title}`;
+      const items = document.createElement('div'); items.className = 'phase-items';
+      phase.items.forEach(([text, id]) => items.append(entryButton(text, id)));
+      section.append(head, items); timeline.append(section);
+    });
+
+    const absence = document.createElement('section'); absence.className = 'absence';
+    const absenceTitle = document.createElement('div'); absenceTitle.className = 'absence-title'; absenceTitle.textContent = 'ABWESENHEIT & WECHSEL';
+    const absenceItems = document.createElement('div'); absenceItems.className = 'absence-items';
+    absenceItems.append(entryButton('Ferienübergabe oder interne Übergabe','uebergabe-intern'));
+    absenceItems.append(entryButton('Externe Weiterbehandlung','uebergabe-extern'));
+    absence.append(absenceTitle, absenceItems); timeline.append(absence);
+
+    function showDetail(id) {
+      const item = byId.get(id); if (!item) return;
+      title.textContent = item.title;
+      when.innerHTML = '<strong>Wann?</strong> ' + item.when;
+      options.replaceChildren();
+      item.options.forEach(text => {
+        const row = document.createElement('div'); row.className = 'copy-row';
+        const value = document.createElement('div'); value.className = 'copy-text'; value.textContent = text;
+        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'copy-button'; copy.textContent = 'Kopieren';
+        copy.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(text); }
+          catch { const area=document.createElement('textarea'); area.value=text; document.body.append(area); area.select(); document.execCommand('copy'); area.remove(); }
+          copy.textContent = 'Kopiert'; setTimeout(() => copy.textContent = 'Kopieren', 1400);
+        });
+        row.append(value, copy); options.append(row);
+      });
+      tariff.textContent = item.tariff;
+      dialog.showModal();
+    }
+
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-detail]'); if (button) showDetail(button.dataset.detail);
+    });
+    document.querySelector('.close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+  </script>
+</body>
+</html>
